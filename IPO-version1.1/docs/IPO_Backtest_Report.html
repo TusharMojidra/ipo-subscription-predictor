@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPO Model Backtest Report — Predictions vs Reality</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --card: #16161e;
+    --card-hover: #1c1c26;
+    --border: #232330;
+    --text: #e4e4e7;
+    --text2: #a1a1aa;
+    --dim: #71717a;
+    --accent: #a855f7;
+    --accent2: #ec4899;
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #eab308;
+    --blue: #3b82f6;
+    --purple: #c084fc;
+    --cyan: #06b6d4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── Animated background ── */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(168,85,247,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(236,72,153,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(59,130,246,0.04) 0%, transparent 50%);
+    animation: bgFloat 20s ease-in-out infinite;
+    z-index: -1;
+  }
+  @keyframes bgFloat {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(2%, -1%) rotate(1deg); }
+    66% { transform: translate(-1%, 2%) rotate(-1deg); }
+  }
+
+  /* ── Layout ── */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+
+  /* ── Hero Header ── */
+  .hero {
+    text-align: center;
+    padding: 60px 0 40px;
+    position: relative;
+  }
+  .hero-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(236,72,153,0.15));
+    border: 1px solid rgba(168,85,247,0.3);
+    color: var(--purple);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: 2.8rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  .hero p {
+    color: var(--text2);
+    font-size: 1.05rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* ── Summary Cards Row ── */
+  .summary-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin: 40px 0;
+  }
+  .summary-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 16px 16px 0 0;
+  }
+  .summary-card:nth-child(1)::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .summary-card:nth-child(2)::before { background: linear-gradient(90deg, var(--green), var(--cyan)); }
+  .summary-card:nth-child(3)::before { background: linear-gradient(90deg, var(--yellow), var(--red)); }
+  .summary-card:nth-child(4)::before { background: linear-gradient(90deg, var(--blue), var(--purple)); }
+  .summary-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(168,85,247,0.3);
+    box-shadow: 0 8px 32px rgba(168,85,247,0.1);
+  }
+  .summary-card .label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--dim);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .summary-card .value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .summary-card .sub {
+    font-size: 0.78rem;
+    color: var(--dim);
+    margin-top: 4px;
+  }
+
+  /* ── Section Headers ── */
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 48px 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-title .icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    background: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(236,72,153,0.2));
+    border: 1px solid rgba(168,85,247,0.3);
+  }
+
+  /* ── IPO Comparison Cards ── */
+  .ipo-grid {
+    display: grid;
+    gap: 20px;
+  }
+  .ipo-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  .ipo-card:hover {
+    border-color: rgba(168,85,247,0.3);
+    box-shadow: 0 8px 32px rgba(168,85,247,0.08);
+  }
+  .ipo-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .ipo-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .ipo-date {
+    font-size: 0.8rem;
+    color: var(--dim);
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(255,255,255,0.05);
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+
+  .ipo-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  @media (max-width: 768px) {
+    .ipo-body { grid-template-columns: 1fr; }
+  }
+
+  .ipo-section {
+    padding: 20px 24px;
+  }
+  .ipo-section:first-child {
+    border-right: 1px solid var(--border);
+  }
+  @media (max-width: 768px) {
+    .ipo-section:first-child {
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+  }
+
+  .ipo-section h4 {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--dim);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .ipo-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .metric {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .metric-label {
+    font-size: 0.7rem;
+    color: var(--dim);
+    font-weight: 500;
+  }
+  .metric-value {
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Gain Comparison Bar ── */
+  .gain-bar-container {
+    margin-top: 16px;
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .gain-bar-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--dim);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .gain-bar-track {
+    position: relative;
+    height: 32px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    overflow: visible;
+  }
+  .gain-bar-center {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(255,255,255,0.1);
+  }
+  .gain-marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    height: 12px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+    z-index: 2;
+  }
+  .gain-marker.actual {
+    background: var(--green);
+    color: #000;
+    outline: 2px solid rgba(34,197,94,0.3);
+  }
+  .gain-marker.predicted {
+    background: var(--accent);
+    color: #fff;
+    outline: 2px solid rgba(168,85,247,0.3);
+  }
+  .gain-legend {
+    display: flex;
+    gap: 20px;
+    margin-top: 10px;
+    font-size: 0.75rem;
+    color: var(--dim);
+  }
+  .gain-legend span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .gain-legend .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  /* ── Probability Bars ── */
+  .prob-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .prob-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    width: 60px;
+    flex-shrink: 0;
+  }
+  .prob-track {
+    flex: 1;
+    height: 8px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .prob-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1.5s ease;
+  }
+  .prob-fill.low { background: linear-gradient(90deg, #ef4444, #f97316); }
+  .prob-fill.med { background: linear-gradient(90deg, #eab308, #f59e0b); }
+  .prob-fill.high { background: linear-gradient(90deg, #22c55e, #06b6d4); }
+  .prob-val {
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text2);
+    width: 45px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ── Tier Badge ── */
+  .tier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .tier-badge.low { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+  .tier-badge.medium { background: rgba(234,179,8,0.15); color: #eab308; border: 1px solid rgba(234,179,8,0.3); }
+  .tier-badge.high { background: rgba(34,197,94,0.15); color: #22c55e; border: 1px solid rgba(34,197,94,0.3); }
+
+  .match-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+  .match-badge.match { background: rgba(34,197,94,0.12); color: #22c55e; }
+  .match-badge.miss { background: rgba(239,68,68,0.12); color: #ef4444; }
+
+  /* ── Insights Section ── */
+  .insight-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+  }
+  .insight-card:hover {
+    border-color: rgba(168,85,247,0.3);
+  }
+  .insight-card h4 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .insight-card p {
+    font-size: 0.85rem;
+    color: var(--text2);
+    line-height: 1.7;
+  }
+  .insight-card .highlight {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ── Bottom Banner ── */
+  .bottom-banner {
+    text-align: center;
+    padding: 48px 24px;
+    margin-top: 40px;
+    border-top: 1px solid var(--border);
+    color: var(--dim);
+    font-size: 0.8rem;
+  }
+  .bottom-banner strong {
+    color: var(--text2);
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .ipo-card { animation: fadeUp 0.6s ease backwards; }
+  .ipo-card:nth-child(1) { animation-delay: 0.1s; }
+  .ipo-card:nth-child(2) { animation-delay: 0.2s; }
+  .ipo-card:nth-child(3) { animation-delay: 0.3s; }
+  .ipo-card:nth-child(4) { animation-delay: 0.4s; }
+  .ipo-card:nth-child(5) { animation-delay: 0.5s; }
+  .summary-card { animation: fadeUp 0.5s ease backwards; }
+  .summary-card:nth-child(1) { animation-delay: 0.05s; }
+  .summary-card:nth-child(2) { animation-delay: 0.1s; }
+  .summary-card:nth-child(3) { animation-delay: 0.15s; }
+  .summary-card:nth-child(4) { animation-delay: 0.2s; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 1.8rem; }
+    .summary-card .value { font-size: 1.6rem; }
+    .container { padding: 20px 16px; }
+    .ipo-header { padding: 16px; }
+    .ipo-section { padding: 16px; }
+    .gain-bar-container { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ═══ HERO ═══ -->
+  <div class="hero">
+    <div class="hero-badge">🔬 Model Backtest Report</div>
+    <h1>Predictions vs Reality</h1>
+    <p>We tested our ML models on 5 recent IPOs (Feb – May 2026). Here's how the predictions compare to actual listing results.</p>
+  </div>
+
+  <!-- ═══ SUMMARY ═══ -->
+  <div class="summary-row">
+    <div class="summary-card">
+      <div class="label">IPOs Tested</div>
+      <div class="value" style="color: var(--accent);">5</div>
+      <div class="sub">Feb – May 2026</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Tier Accuracy</div>
+      <div class="value" style="color: var(--green);">80%</div>
+      <div class="sub">4 out of 5 correct</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Avg Gain Error</div>
+      <div class="value" style="color: var(--yellow);">±21.3</div>
+      <div class="sub">percentage points</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Max Gain Error</div>
+      <div class="value" style="color: var(--red);">63.8</div>
+      <div class="sub">Shree Ram Twistex</div>
+    </div>
+  </div>
+
+  <!-- ═══ INDIVIDUAL IPO COMPARISONS ═══ -->
+  <div class="section-title">
+    <div class="icon">📊</div>
+    IPO-by-IPO Breakdown
+  </div>
+
+  <div class="ipo-grid">
+
+    <!-- ── IPO 1: Bagmane Prime ── -->
+    <div class="ipo-card">
+      <div class="ipo-header">
+        <div class="ipo-name">
+          <span>🏢</span> Bagmane Prime Office Parks
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div class="ipo-date">2026-05-14</div>
+          <div class="match-badge miss">❌ Tier Mismatch</div>
+        </div>
+      </div>
+      <div class="ipo-body">
+        <div class="ipo-section">
+          <h4>🎯 Prediction Model</h4>
+          <div class="ipo-metrics">
+            <div class="metric">
+              <span class="metric-label">Predicted Gain</span>
+              <span class="metric-value" style="color:var(--green);">+20.53%</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Predicted Tier</span>
+              <span class="tier-badge medium">● Medium</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Issue Size</span>
+              <span class="metric-value">₹3,405 Cr</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Offer Price</span>
+              <span class="metric-value">₹100</span>
+            </div>
+          </div>
+        </div>
+        <div class="ipo-section">
+          <h4>📌 Actual Result</h4>
+          <div class="ipo-metrics">
+            <div class="metric">
+              <span class="metric-label">Actual Gain</span>
+              <span class="metric-value" style="color:var(--green);">+3.40%</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Actual Tier</span>
+              <span class="tier-badge high">● High</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">List Price</span>
+              <span class="metric-value">₹103.40</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Total Sub</span>
+              <span class="metric-value">16.50x</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Gain Bar -->
+      <div class="gain-bar-container">
+        <div class="gain-bar-label">Gain Comparison (range: -40% to +40%)</div>
+        <div class="gain-bar-track">
+          <div class="gain-bar-center"></div>
+          <!-- Actual: +3.40% → 50 + (3.40/40)*50 = 54.25% -->
+          <div class="gain-marker actual" style="left:54.25%;">+3.4%</div>
+          <!-- Predicted: +20.53% → 50 + (20.53/40)*50 = 75.66% -->
+          <div class="gain-marker predicted" style="left:75.66%;">+20.5%</div>
+        </div>
+        <div class="gain-legend">
+          <span><div class="dot" style="background:var(--green);"></div> Actual</span>
+          <span><div class="dot" style="background:var(--accent);"></div> Predicted</span>
+        </div>
+      </div>
+      <!-- Tier Probabilities -->
+      <div style="padding: 16px 24px 20px; border-top: 1px solid var(--border);">
+        <div class="gain-bar-label">Tier Probability Breakdown</div>
+        <div class="prob-row">
+          <span class="prob-label" style="color:#ef4444;">Low</span>
+          <div class="prob-track"><div class="prob-fill low" style="width:26.1%"></div></div>
+          <span class="prob-val">26.1%</span>
+        </div>
+        <div class="prob-row">
+          <span class="prob-label" style="color:#eab308;">Medium</span>
+          <div class="prob-track"><div class="prob-fill med" style="width:41.2%"></div></div>
+          <span class="prob-val">41.2%</span>
+        </div>
+        <div class="prob-row">
+          <span class="prob-label" style="color:#22c55e;">High</span>
+          <div class="prob-track"><div class="prob-fill high" style="width:32.7%"></div></div>
+          <span class="prob-val">32.7%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── IPO 2: Sedemac Mechatronics ── -->
+    <div class="ipo-card">
+      <div class="ipo-header">
+        <div class="ipo-name">
+          <span>⚙️</span> Sedemac Mechatronics
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div class="ipo-date">2026-03-11</div>
+          <div class="match-badge match">✅ Tier Match</div>
+        </div>
+      </div>
+      <div class="ipo-body">
+        <div class="ipo-section">
+          <h4>🎯 Prediction Model</h4>
+          <div class="ipo-metrics">
+            <div class="metric">
+              <span class="metric-label">Predicted Gain</span>
+              <span class="metric-value" style="color:var(--red);">-4.78%</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Predicted Tier</span>
+              <span class="tier-badge medium">● Medium</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Issue Size</span>
+              <span class="metric-value">₹1,087 Cr</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Offer Price</span>
+              <span class="metric-value">₹1,352</span>
+            </div>
+          </div>
+        </div>
+        <div class="ipo-section">
+          <h4>📌 Actual Result</h4>
+          <div class="ipo-metrics">
+            <div class="metric">
+              <span class="metric-label">Actual Gain</span>
+              <span class="metric-value" style="color:var(--green);">+11.69%</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Actual Tier</span>
+              <span class="tier-badge medium">● Medium</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">List Price</span>
+              <span class="metric-value">₹1,510</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Total Sub</span>
+              <span class="metric-value">2.68x</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="gain-bar-container">
+        <div class="gain-bar-label">Gain Comparison (range: -40% to +40%)</div>
+        <div class="gain-bar-track">
+          <div class="gain-bar-center"></div>
+          <!-- Actual: +11.69% → 50 + (11.69/40)*50 = 64.61% -->
+          <div class="gain-marker actual" style="left:64.61%;">+11.7%</div>
+          <!-- Predicted: -4.78% → 50 + (-4.78/40)*50 = 44.03% -->
+          <div class="gain-marker predicted" style="left:44.03%;">-4.8%</div>
+        </div>
+        <div class="gain-legend">
+          <span><div class="dot" style="background:var(--green);"></div> Actual</span>
+          <span><div class="dot" style="background:var(--accent);"></div> Predicted</span>
+        </div>
+      </div>
+      <div style="padding: 16px 24px 20px; border-top: 1px solid var(--border);">
+        <div class="gain-bar-label">Tier Probability Breakdown</div>
+        <div class="prob-row">
+          <span class="prob-label" style="color:#ef4444;">Low</span>
+          <div class="prob-track"><div class="prob-fill low" style="width:29.3%"></div></div>
+          <span class="prob-val">29.3%</span>
+        </div>
+        <div class="prob-row">
+          <span class="prob-label" style="color:#eab308;">Medium</span>
+          <div class="prob-track"><div class="prob-fill med" style="width:38.1%"></div></div>
+          <span class="prob-val">38.1%</span>
+        </div>
+        <div class="prob-row">
+          <span class="prob-label" style="color:#22c55e;">High</span>
+          <div class="prob-track"><div class="prob-fill high" style="width:32.6%"></div></div>
+          <span class="prob-val">32.6%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── IPO 3: Powerica Ltd ── -->
+    <div class="ipo-card">
+      <div class="ipo-header">
+        <div class="ipo-name">
+          <span>⚡</span> Powerica Ltd
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div class="ipo-date">2026-04-02</div>
+          <div class="match-badge match">✅ Tier Match</div>
+        </div>
+      </div>
+      <div class="ipo-body">
+        <div class="ipo-section">
+          <h4>🎯 Prediction Model</h4>
+          <div class="ipo-metrics">
+            <div class="metric">
+              <span class="metric-label">Predicted Gain</span>
+              <span class="metric-value" style="color:var(--red);">-7.17%</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Predicted Tier</span>
+              <span class="tier-badge low">● Low</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Issue Size</span>
+              <span class="metric-value">₹1,100 Cr</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Offer Price</span>
+              <span class="metric-value">₹395</span>
+            </div>
+          </div>
+        </div>
+        <div class="ipo-section">
+          <h4>📌 Actual Result</h4>
+          <div class="ipo-metrics">
+            <div class="metric">
+              <span class="metric-label">Actual Gain</span>
+              <span class="metric-value" style="color:var(--red);">-5.06%</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Actual Tier</span>
+              <span class="tier-badge low">● Low</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">List Price</span>
+              <span class="metric-value">₹375</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Total Sub</span>
+              <span class="metric-value">1.45x</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="gain-bar-container">
+        <div class="gain-bar-label">Gain Comparison (range: -40% to +40%)</div>
+        <div class="gain-bar-track">
+          <div class="gain-bar-center"></div>
+          <!-- Actual: -5.06% → 50 + (-5.06/40)*50 = 43.68% -->
+          <div class="gain-marker actual" style="left:43.68%;">-5.1%</div>
+          <!-- Predicted: -7.17% → 50 + (-7.17/40)*50 = 41.04% -->
+          <div class="gain-marker predicted" style="left:41.04%;">-7.2%</div>
+        </div>
+        <div class="gain-legend">
+          <span><div class="dot" style="background:var(--green);"></div> Actual</span>
+          <span><div class="dot" style="background:var(--accent);"></div> Predicted</span>
+        </div>
+      </div>
+      <div style="padding: 16px 24px 20px; border-top: 1px solid var(--border);">
+        <div class="gain-bar-label">Tier Probability Breakdown</div>
+        <div class="prob-row">
+          <span class="prob-label" style="color:#ef4444;">Low</span>
+          <div class="prob-track"><div class="prob-fill low" style="width:41.7%"></div></div>
+          <span class="prob-val">41.7%</span>
+        </div>
+        <div class="prob-row">
+          <span class="prob-label" style="color:#eab308;">Medium</span>
+          <div class="prob-track"><div class="prob-fill med" style="width:30.0%"></div></div>
+          <span class="prob-val">30.0%</span>
+        </div>
+        <div class="prob-row">
+          <span class="prob-label" style="color:#22c55e;">High</span>
+          <div class="prob-track"><div class="prob-fill high" style="width:28.3%"></div></div>
+          <span class="prob-val">28.3%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── IPO 4: Shree Ram Twistex ── -->
+    <div class="ipo-card">
+      <div class="ipo-header">
+        <div class="ipo-name">
+          <span>🧵</span> Shree Ram Twistex Ltd
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div class="ipo-date">2026-03-02</div>
+          <div class="match-badge match">✅ Tier Match</div>
+        </div>
+      </div>
+      <div class="ipo-body">
+        <div class="ipo-section">
+          <h4>🎯 Prediction Model</h4>
+          <div class="ipo-metrics">
+            <div class="metric">
+              <span class="metric-label">Predicted Gain</span>
+              <span class="metric-value" style="color:var(--green);">+31.12%</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Predicted Tier</span>
+              <span class="tier-badge high">● High</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Issue Size</span>
+              <span class="metric-value">₹110 Cr</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Offer Price</span>
+              <span class="metric-value">₹104</span>
+            </div>
+          </div>
+        </div>
+        <div class="ipo-section">
+          <h4>📌 Actual Result</h4>
+          <div class="ipo-metrics">
+            <div class="metric">
+              <span class="metric-label">Actual Gain</span>
+              <span class="metric-value" style="color:var(--red);">-32.69%</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Actual Tier</span>
+              <span class="tier-badge high">● High</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">List Price</span>
+              <span class="metric-value">₹70</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Total Sub</span>
+              <span class="metric-value">43.66x</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="gain-bar-container">
+        <div class="gain-bar-label">Gain Comparison (range: -40% to +40%)</div>
+        <div class="gain-bar-track">
+          <div class="gain-bar-center"></div>
+          <!-- Actual: -32.69% → 50 + (-32.69/40)*50 = 9.14% -->
+          <div class="gain-marker actual" style="left:9.14%;">-32.7%</div>
+          <!-- Predicted: +31.12% → 50 + (31.12/40)*50 = 88.9% -->
+          <div class="gain-marker predicted" style="left:88.9%;">+31.1%</div>
+        </div>
+        <div class="gain-legend">
+          <span><div class="dot" style="background:var(--green);"></div> Actual</span>
+          <span><div class="dot" style="background:var(--accent);"></div> Predicted</span>
+        </div>
+      </div>
+      <div style="padding: 16px 24px 20px; border-top: 1px solid var(--border);">
+        <div class="gain-bar-label">Tier Probability Breakdown</div>
+        <div class="prob-row">
+          <span class="prob-label" style="color:#ef4444;">Low</span>
+          <div class="prob-track"><div class="prob-fill low" style="width:17.9%"></div></div>
+          <span class="prob-val">17.9%</span>
+        </div>
+        <div class="prob-row">
+          <span class="prob-label" style="color:#eab308;">Medium</span>
+          <div class="prob-track"><div class="prob-fill med" style="width:35.5%"></div></div>
+          <span class="prob-val">35.5%</span>
+        </div>
+        <div class="prob-row">
+          <span class="prob-label" style="color:#22c55e;">High</span>
+          <div class="prob-track"><div class="prob-fill high" style="width:46.7%"></div></div>
+          <span class="prob-val">46.7%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── IPO 5: Gaudium IVF ── -->
+    <div class="ipo-card">
+      <div class="ipo-header">
+        <div class="ipo-name">
+          <span>🏥</span> Gaudium IVF & Women's Health
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div class="ipo-date">2026-02-27</div>
+          <div class="match-badge match">✅ Tier Match</div>
+        </div>
+      </div>
+      <div class="ipo-body">
+        <div class="ipo-section">
+          <h4>🎯 Prediction Model</h4>
+          <div class="ipo-metrics">
+            <div class="metric">
+              <span class="metric-label">Predicted Gain</span>
+              <span class="metric-value" style="color:var(--green);">+12.13%</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Predicted Tier</span>
+              <span class="tier-badge medium">● Medium</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Issue Size</span>
+              <span class="metric-value">₹165 Cr</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Offer Price</span>
+              <span class="metric-value">₹79</span>
+            </div>
+          </div>
+        </div>
+        <div class="ipo-section">
+          <h4>📌 Actual Result</h4>
+          <div class="ipo-metrics">
+            <div class="metric">
+              <span class="metric-label">Actual Gain</span>
+              <span class="metric-value" style="color:var(--green);">+5.06%</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Actual Tier</span>
+              <span class="tier-badge medium">● Medium</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">List Price</span>
+              <span class="metric-value">₹83</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Total Sub</span>
+              <span class="metric-value">7.25x</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="gain-bar-container">
+        <div class="gain-bar-label">Gain Comparison (range: -40% to +40%)</div>
+        <div class="gain-bar-track">
+          <div class="gain-bar-center"></div>
+          <!-- Actual: +5.06% → 50 + (5.06/40)*50 = 56.33% -->
+          <div class="gain-marker actual" style="left:56.33%;">+5.1%</div>
+          <!-- Predicted: +12.13% → 50 + (12.13/40)*50 = 65.16% -->
+          <div class="gain-marker predicted" style="left:65.16%;">+12.1%</div>
+        </div>
+        <div class="gain-legend">
+          <span><div class="dot" style="background:var(--green);"></div> Actual</span>
+          <span><div class="dot" style="background:var(--accent);"></div> Predicted</span>
+        </div>
+      </div>
+      <div style="padding: 16px 24px 20px; border-top: 1px solid var(--border);">
+        <div class="gain-bar-label">Tier Probability Breakdown</div>
+        <div class="prob-row">
+          <span class="prob-label" style="color:#ef4444;">Low</span>
+          <div class="prob-track"><div class="prob-fill low" style="width:19.7%"></div></div>
+          <span class="prob-val">19.7%</span>
+        </div>
+        <div class="prob-row">
+          <span class="prob-label" style="color:#eab308;">Medium</span>
+          <div class="prob-track"><div class="prob-fill med" style="width:42.0%"></div></div>
+          <span class="prob-val">42.0%</span>
+        </div>
+        <div class="prob-row">
+          <span class="prob-label" style="color:#22c55e;">High</span>
+          <div class="prob-track"><div class="prob-fill high" style="width:38.3%"></div></div>
+          <span class="prob-val">38.3%</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /ipo-grid -->
+
+  <!-- ═══ KEY INSIGHTS ═══ -->
+  <div class="section-title">
+    <div class="icon">💡</div>
+    Key Insights & Analysis
+  </div>
+
+  <div class="insight-card">
+    <h4>🟢 What Worked Well</h4>
+    <p>
+      The <span class="highlight">tier classification (Low/Medium/High)</span> matched the actual subscription tier in <span class="highlight">4 out of 5 cases (80%)</span>. 
+      For <strong>Powerica</strong>, the model correctly predicted both the Low tier AND the negative listing gain — the closest prediction of all (only ±2.1 pp error).
+      The model correctly identifies struggling IPOs with low subscription demand.
+    </p>
+  </div>
+
+  <div class="insight-card">
+    <h4>🔴 Where It Struggled</h4>
+    <p>
+      The <span class="highlight">gain magnitude</span> was often off — averaging ±21.3 percentage points error. 
+      The worst case was <strong>Shree Ram Twistex</strong>: the model predicted <span class="highlight">+31%</span> gain but the IPO actually lost <span class="highlight">-32.7%</span> — a 63.8 pp swing. 
+      This is because the model's tier classifier saw "High subscription = big gains" as a pattern, but Shree Ram had extreme HNI (220x) and RII (76x) subscription yet still crashed on listing — an anomaly the model hasn't learned.
+    </p>
+  </div>
+
+  <div class="insight-card">
+    <h4>📐 Why Bagmane Missed the Tier</h4>
+    <p>
+      Bagmane Prime Office had a Total subscription of <span class="highlight">16.5x</span> (which is "High" by our definition ≥10x), but the tier classifier predicted "Medium" because it only uses <span class="highlight">3 features</span>: issue size (₹3,405 Cr — very large), offer price (₹100), and year. 
+      It doesn't see the subscription numbers — those come AFTER bidding closes. The pre-IPO tier model got confused by the unusually large issue size.
+    </p>
+  </div>
+
+  <div class="insight-card">
+    <h4>🔧 How to Improve</h4>
+    <p>
+      <span class="highlight">1. More features for the tier classifier</span> — Add sector, company age, profit/loss, and market sentiment. Right now it only uses issue size, price, and year.<br>
+      <span class="highlight">2. Non-linear gain model</span> — Switch from Huber regression (linear) to <span class="highlight">XGBoost or LightGBM</span> for the listing gain prediction, which can capture the non-linear relationship between subscription and gain.<br>
+      <span class="highlight">3. Outlier handling</span> — IPOs like Shree Ram Twistex (43x total but -33% gain) are rare outliers. Adding a "normalization factor" or training on more data would help.<br>
+      <span class="highlight">4. Time-aware features</span> — Market conditions change month to month. Adding a "recent market momentum" feature would help the model adapt.
+    </p>
+  </div>
+
+  <div class="insight-card">
+    <h4>📊 Bottom Line</h4>
+    <p>
+      The model is a <span class="highlight">useful starting point</span> — it correctly identifies the general demand tier 80% of the time, which is significantly better than random guessing (33%). 
+      However, the gain prediction needs improvement before it can be used for investment decisions. 
+      This is expected for a project with only <span class="highlight">648 IPOs of training data</span> and <span class="highlight">3 features</span> for classification.
+    </p>
+  </div>
+
+  <!-- ═══ FOOTER ═══ -->
+  <div class="bottom-banner">
+    <p>Generated on August 20, 2026 · <strong>IPO Subscription & Listing Gain Prediction using Machine Learning</strong></p>
+    <p style="margin-top:6px;">Model: Logistic Regression (Tier) + Huber Regression (Gain) · Dataset: 648 IPOs, 2010–2026</p>
+  </div>
+
+</div>
+
+</body>
+</html>

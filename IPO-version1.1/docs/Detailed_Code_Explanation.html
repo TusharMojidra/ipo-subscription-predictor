@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPO Project — Detailed Code Explanation</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0B0E14;--panel:#131720;--panel2:#181D29;--border:#1E2536;--text:#E4E7EF;--text2:#9DA4B8;--accent:#A855F7;--accent2:#EC4899;--green:#22C55E;--red:#EF4444;--blue:#3B82F6;--code-bg:#0D1117;--code-border:#21262D;--code-text:#C9D1D9;--keyword:#FF7B72;--string:#A5D6FF;--comment:#8B949E;--func:#D2A8FF;--number:#79C0FF;--decorator:#FFA657;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;scroll-padding-top:80px;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.7;font-size:15px;}
+::selection{background:rgba(168,85,247,0.35);color:#fff;}
+
+/* ─── NAV ─── */
+.topnav{position:sticky;top:0;z-index:999;background:rgba(11,14,20,0.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0.6rem 2rem;display:flex;align-items:center;justify-content:space-between;}
+.topnav .brand{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;color:var(--text);}
+.topnav .brand .ico{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.65rem;font-weight:700;}
+.topnav nav{display:flex;gap:4px;}
+.topnav nav a{color:var(--text2);text-decoration:none;font-size:0.78rem;font-weight:600;padding:0.4rem 0.8rem;border-radius:8px;transition:all 0.2s;}
+.topnav nav a:hover,.topnav nav a.active{color:#fff;background:rgba(168,85,247,0.15);}
+
+/* ─── HERO ─── */
+.hero{padding:3.5rem 2rem 2.5rem;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(800px 400px at 50% -10%,rgba(168,85,247,0.15),transparent 60%),radial-gradient(600px 300px at 80% 100%,rgba(236,72,153,0.1),transparent 60%);pointer-events:none;}
+.hero h1{font-family:'Space Grotesk',sans-serif;font-size:2.6rem;font-weight:700;letter-spacing:-0.03em;margin-bottom:0.8rem;position:relative;}
+.hero h1 .grad{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.hero p{color:var(--text2);font-size:1rem;max-width:600px;margin:0 auto;position:relative;}
+.hero .badge-row{display:flex;justify-content:center;gap:10px;margin-top:1.2rem;position:relative;}
+.hero .chip{background:var(--panel);border:1px solid var(--border);border-radius:999px;padding:0.35rem 1rem;font-size:0.75rem;font-weight:600;color:var(--text2);display:inline-flex;align-items:center;gap:6px;}
+.hero .chip .dot{width:7px;height:7px;border-radius:50%;}
+
+/* ─── CONTAINER ─── */
+.container{max-width:1100px;margin:0 auto;padding:0 1.5rem 4rem;}
+
+/* ─── TOC ─── */
+.toc{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:2rem;margin:2rem 0;}
+.toc h2{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;margin-bottom:1rem;color:var(--text);}
+.toc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:0.6rem;}
+.toc a{display:block;padding:0.6rem 0.9rem;background:var(--panel2);border:1px solid var(--border);border-radius:10px;color:var(--text2);text-decoration:none;font-size:0.82rem;font-weight:500;transition:all 0.2s;}
+.toc a:hover{border-color:var(--accent);color:var(--text);transform:translateX(4px);}
+.toc a .num{color:var(--accent);font-weight:700;margin-right:6px;}
+
+/* ─── FILE SECTION ─── */
+.file-section{margin:2.5rem 0;scroll-margin-top:80px;}
+.file-header{display:flex;align-items:center;gap:12px;margin-bottom:1.2rem;padding-bottom:0.8rem;border-bottom:1px solid var(--border);}
+.file-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:#fff;flex-shrink:0;}
+.file-icon.py{background:linear-gradient(135deg,#3776AB,#FFD43B);}
+.file-icon.html{background:linear-gradient(135deg,#E34F26,#FF6B35);}
+.file-icon.csv{background:linear-gradient(135deg,#217346,#33A852);}
+.file-header h2{font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;color:var(--text);}
+.file-header .path{color:var(--text2);font-size:0.78rem;font-family:'Fira Code',monospace;}
+.file-desc{color:var(--text2);font-size:0.9rem;margin-bottom:1.2rem;line-height:1.8;background:var(--panel);border-left:3px solid var(--accent);padding:0.8rem 1.1rem;border-radius:0 10px 10px 0;}
+
+/* ─── CODE BLOCKS ─── */
+.code-wrap{background:var(--code-bg);border:1px solid var(--code-border);border-radius:12px;margin:1rem 0;overflow:hidden;}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 1rem;background:rgba(255,255,255,0.03);border-bottom:1px solid var(--code-border);}
+.code-header .fname{font-family:'Fira Code',monospace;font-size:0.72rem;color:var(--text2);}
+.code-header .lang{font-size:0.65rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;}
+pre{padding:1rem 1.2rem;overflow-x:auto;font-family:'Fira Code',monospace;font-size:0.8rem;line-height:1.65;color:var(--code-text);tab-size:4;}
+pre .kw{color:var(--keyword);}
+pre .str{color:var(--string);}
+pre .cmt{color:var(--comment);font-style:italic;}
+pre .fn{color:var(--func);}
+pre .num{color:var(--number);}
+pre .dec{color:var(--decorator);}
+pre .op{color:var(--keyword);}
+pre .bi{color:var(--green);}
+
+/* ─── EXPLANATION BLOCKS ─── */
+.explain{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:1.2rem 1.4rem;margin:1rem 0;}
+.explain h3{font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:700;color:var(--accent);margin-bottom:0.6rem;display:flex;align-items:center;gap:8px;}
+.explain p{color:var(--text2);margin-bottom:0.5rem;}
+.explain ul{padding-left:1.3rem;color:var(--text2);}
+.explain li{margin-bottom:0.3rem;}
+.explain li strong{color:var(--text);}
+.explain .highlight{background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);border-radius:8px;padding:0.5rem 0.8rem;margin:0.5rem 0;font-size:0.85rem;color:var(--text2);}
+.explain .highlight strong{color:var(--accent);}
+
+.line-explain{display:grid;grid-template-columns:50px 1fr;gap:0.3rem 1rem;margin:0.3rem 0;padding:0.3rem 0;border-bottom:1px solid rgba(255,255,255,0.03);}
+.line-explain:last-child{border-bottom:none;}
+.line-num{font-family:'Fira Code',monospace;font-size:0.75rem;color:var(--comment);text-align:right;padding-top:2px;}
+.line-text{font-size:0.85rem;color:var(--text2);}
+.line-text strong{color:var(--text);}
+
+/* ─── FLOW DIAGRAM ─── */
+.flow{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:2rem;margin:1.5rem 0;text-align:center;}
+.flow h3{font-family:'Space Grotesk',sans-serif;color:var(--text);margin-bottom:1rem;}
+.flow-chart{font-family:'Fira Code',monospace;font-size:0.78rem;color:var(--text2);line-height:2;white-space:pre;overflow-x:auto;text-align:left;}
+.flow-chart .box{color:var(--accent);font-weight:600;}
+.flow-chart .arrow{color:var(--accent2);}
+.flow-chart .desc{color:var(--comment);}
+
+/* ─── TABLE ─── */
+.param-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:0.85rem;}
+.param-table th{text-align:left;padding:0.6rem 0.8rem;color:var(--faint,#71717A);font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--border);color:var(--text2);}
+.param-table td{padding:0.5rem 0.8rem;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text2);}
+.param-table td:first-child{font-family:'Fira Code',monospace;font-size:0.8rem;color:var(--green);font-weight:500;}
+.param-table td:nth-child(2){font-weight:600;color:var(--text);}
+
+/* ─── SEPARATOR ─── */
+.sep{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:3rem 0;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:720px){
+  .hero h1{font-size:1.8rem;}
+  .toc-grid{grid-template-columns:1fr;}
+  .line-explain{grid-template-columns:1fr;}
+  .line-num{display:none;}
+  pre{font-size:0.72rem;padding:0.8rem;}
+  .topnav{padding:0.5rem 1rem;flex-wrap:wrap;}
+  .topnav nav{overflow-x:auto;width:100%;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════ NAVBAR ═══════ -->
+<div class="topnav">
+  <div class="brand">
+    <div class="ico">IP</div>
+    IPO Predictor — Code Documentation
+  </div>
+  <nav>
+    <a href="#file-main" class="active">main.py</a>
+    <a href="#file-loader">data_loader</a>
+    <a href="#file-preprocess">preprocessing</a>
+    <a href="#file-feat">feature_eng</a>
+    <a href="#file-class">classification</a>
+    <a href="#file-reg">regression</a>
+    <a href="#file-eda">eda.py</a>
+    <a href="#file-predict">predict_ipo</a>
+    <a href="#file-app">app.py</a>
+  </nav>
+</div>
+
+<!-- ═══════ HERO ═══════ -->
+<div class="hero">
+  <h1>IPO Project — <span class="grad">Line-by-Line</span> Code Explanation</h1>
+  <p>Every file, every function, every line explained in plain English so you can teach it to anyone.</p>
+  <div class="badge-row">
+    <span class="chip"><span class="dot" style="background:var(--accent)"></span>9 Files</span>
+    <span class="chip"><span class="dot" style="background:var(--green)"></span>~1,200 Lines</span>
+    <span class="chip"><span class="dot" style="background:var(--blue)"></span>Pipeline → Dashboard</span>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ═══════ ARCHITECTURE FLOW ═══════ -->
+<div class="flow">
+  <h3>📐 Project Architecture — How Data Flows</h3>
+  <div class="flow-chart">
+<span class="box">data/raw/ipo_data.csv</span>  <span class="desc">(raw 652 IPOs)</span>
+         <span class="arrow">│</span>
+         <span class="arrow">▼</span>
+<span class="box">src/data_loader.py</span>  <span class="desc">→ loads CSV into pandas DataFrame</span>
+         <span class="arrow">│</span>
+         <span class="arrow">▼</span>
+<span class="box">src/preprocessing.py</span>  <span class="desc">→ cleans dates, fills NaN, caps outliers</span>
+         <span class="arrow">│</span>
+         <span class="arrow">▼</span>
+<span class="box">src/feature_engineering.py</span>  <span class="desc">→ adds log transforms, subscription classes</span>
+         <span class="arrow">│</span>
+         <span class="arrow">▼</span>
+<span class="box">data/processed/cleaned_ipo_data.csv</span>  <span class="desc">(648 IPOs, ready to use)</span>
+         <span class="arrow">│</span>
+    <span class="arrow">┌──────┴──────┐</span>
+    <span class="arrow">│</span>             <span class="arrow">│</span>
+    <span class="arrow">▼</span>             <span class="arrow">▼</span>
+<span class="box">src/</span><span class="box">models_classification.py</span>   <span class="box">src/models_regression.py</span>
+<span class="desc">predicts subscription tier</span>       <span class="desc">predicts listing gain %</span>
+    <span class="arrow">│</span>             <span class="arrow">│</span>
+    <span class="arrow">└──────┬──────┘</span>
+         <span class="arrow">│</span>
+         <span class="arrow">▼</span>
+<span class="box">predict_ipo.py</span>  <span class="desc">→ trains both models, caches to disk</span>
+         <span class="arrow">│</span>
+         <span class="arrow">▼</span>
+<span class="box">app.py</span>  <span class="desc">→ Streamlit dashboard with 4 tabs</span>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- FILE 1: main.py -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="file-section" id="file-main">
+  <div class="file-header">
+    <div class="file-icon py">PY</div>
+    <div>
+      <h2>main.py</h2>
+      <div class="path">D:\IPO-version1.1\main.py</div>
+    </div>
+  </div>
+
+  <div class="file-desc">
+    <strong>Purpose:</strong> This is the <strong>entry point</strong> of the whole project. When you run <code>python main.py</code>, it executes the complete pipeline: load data → clean → engineer features → save → run EDA → train models → output results. Think of it as the <strong>orchestrator</strong> that calls every other file in order.
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header"><span class="fname">main.py</span><span class="lang">Python</span></div>
+    <pre><span class="cmt"># ─── Line 1: Import the data loading function ───</span>
+<span class="kw">from</span> src.data_loader <span class="kw">import</span> <span class="fn">load_data</span>
+
+<span class="cmt"># ─── Lines 2-3: Import ALL cleaning functions from preprocessing.py ───</span>
+<span class="cmt"># Each function does one specific cleaning step</span>
+<span class="kw">from</span> src.preprocessing <span class="kw">import</span> (<span class="fn">clean_data</span>, <span class="fn">drop_unusable_rows</span>,
+                           <span class="fn">fill_missing_values</span>, <span class="fn">winsorize_outliers</span>)
+
+<span class="cmt"># ─── Line 4: Import the function that creates subscription tiers ───</span>
+<span class="kw">from</span> src.feature_engineering <span class="kw">import</span> <span class="fn">add_subscription_class</span>
+
+<span class="cmt"># ─── Line 5: Import the EDA (exploratory data analysis) runner ───</span>
+<span class="kw">from</span> src.eda <span class="kw">import</span> <span class="fn">run_eda</span>
+
+<span class="cmt"># ─── Lines 6-7: Import both ML model trainers ───</span>
+<span class="kw">from</span> src.models_classification <span class="kw">import</span> <span class="fn">run_classification</span>
+<span class="kw">from</span> src.models_regression <span class="kw">import</span> <span class="fn">run_regression</span>
+
+
+<span class="kw">def</span> <span class="fn">main</span>():
+    <span class="cmt"># ─── STEP 1: Load raw CSV data ───</span>
+    <span class="cmt"># load_data() reads the CSV file into a pandas DataFrame (a table)</span>
+    <span class="cmt"># "data/raw/ipo_data.csv" is the path to our raw dataset</span>
+    df = <span class="fn">load_data</span>(<span class="str">"data/raw/ipo_data.csv"</span>)
+
+    <span class="cmt"># Print how many rows (IPOs) and columns (features) we loaded</span>
+    <span class="bi">print</span>(<span class="str">f"Raw data loaded: </span>{df.shape[<span class="num">0</span>]}<span class="str"> rows, </span>{df.shape[<span class="num">1</span>]}<span class="str"> columns"</span>)
+    <span class="cmt"># df.shape[0] = number of rows, df.shape[1] = number of columns</span>
+
+    <span class="cmt"># ─── STEP 2: Clean the data (4 sequential cleaning steps) ───</span>
+    df = <span class="fn">clean_data</span>(df)
+    <span class="cmt"># → strips column names, parses dates, converts strings to numbers</span>
+
+    df = <span class="fn">drop_unusable_rows</span>(df)
+    <span class="cmt"># → removes rows where the target column (Listing Gain) is missing</span>
+    <span class="cmt"># → removes rows where ALL subscription data (QIB/HNI/RII/Total) is missing</span>
+
+    df = <span class="fn">fill_missing_values</span>(df)
+    <span class="cmt"># → fills remaining empty cells with the column's median value</span>
+    <span class="cmt"># → median is used instead of 0 because 0 would corrupt price data</span>
+
+    df = <span class="fn">winsorize_outliers</span>(df)
+    <span class="cmt"># → caps extreme values at 1st and 99th percentile</span>
+    <span class="cmt"># → e.g., if one IPO had 500x subscription, it's capped to a sane value</span>
+
+    <span class="bi">print</span>(<span class="str">f"After cleaning: </span>{df.shape[<span class="num">0</span>]}<span class="str"> rows"</span>)
+
+    <span class="cmt"># ─── STEP 3: Create the classification target ───</span>
+    df = <span class="fn">add_subscription_class</span>(df)
+    <span class="cmt"># → creates a new column "Subscription_Class" with values:</span>
+    <span class="cmt">#   "Low"    if Total subscription &lt; 2x</span>
+    <span class="cmt">#   "Medium" if Total subscription is 2x–10x</span>
+    <span class="cmt">#   "High"   if Total subscription ≥ 10x</span>
+
+    <span class="cmt"># ─── STEP 4: Save cleaned data to disk ───</span>
+    df.<span class="fn">to_csv</span>(<span class="str">"data/processed/cleaned_ipo_data.csv"</span>, index=<span class="kw">False</span>)
+    <span class="cmt"># → writes the cleaned table to a new CSV file</span>
+    <span class="cmt"># → index=False means don't add a row-number column</span>
+    <span class="bi">print</span>(<span class="str">"Data cleaning completed successfully!"</span>)
+
+    <span class="cmt"># ─── STEP 5: Run Exploratory Data Analysis ───</span>
+    <span class="fn">run_eda</span>(df)
+    <span class="cmt"># → generates charts: correlation heatmap, distributions, class balance</span>
+    <span class="cmt"># → saves them as PNG images in reports/figures/</span>
+
+    <span class="cmt"># ─── STEP 6: Train both prediction models ───</span>
+    <span class="fn">run_classification</span>(df)
+    <span class="cmt"># → trains Logistic Regression, Random Forest, SVM for tier prediction</span>
+    <span class="cmt"># → saves results to reports/figures/classification_summary.csv</span>
+
+    <span class="fn">run_regression</span>(df)
+    <span class="cmt"># → trains Huber, Linear, Decision Tree, RF, GBM for gain prediction</span>
+    <span class="cmt"># → saves results to reports/figures/regression_summary.csv</span>
+
+    <span class="cmt"># ─── Final message ───</span>
+    <span class="bi">print</span>(<span class="str">"Pipeline finished. Cleaned data: data/processed/cleaned_ipo_data.csv"</span>)
+    <span class="bi">print</span>(<span class="str">"Figures &amp; summaries: reports/figures/"</span>)
+
+
+<span class="cmt"># ─── This ensures main() runs only when you execute this file directly ───</span>
+<span class="cmt"># (not when another file imports it)</span>
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    <span class="fn">main</span>()</pre>
+  </div>
+
+  <div class="explain">
+    <h3>🔑 Key Concepts in main.py</h3>
+    <ul>
+      <li><strong>Sequential pipeline:</strong> Each step depends on the output of the previous one. Data flows in one direction.</li>
+      <li><strong>def main():</strong> The <code>def</code> keyword defines a function — a reusable block of code. <code>main()</code> is the standard name for the primary function.</li>
+      <li><strong>f-strings (f"..."):</strong> Python's way of embedding variables inside strings. <code>f"{df.shape[0]}"</code> inserts the row count into the text.</li>
+      <li><strong>if __name__ == "__main__":</strong> A Python convention — this block only runs when you execute <code>python main.py</code>, not when you import main.py from another file.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- FILE 2: src/data_loader.py -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="file-section" id="file-loader">
+  <div class="file-header">
+    <div class="file-icon py">PY</div>
+    <div>
+      <h2>src/data_loader.py</h2>
+      <div class="path">D:\IPO-version1.1\src\data_loader.py</div>
+    </div>
+  </div>
+
+  <div class="file-desc">
+    <strong>Purpose:</strong> The simplest file in the project — just 2 lines of code. Its only job is to read a CSV file and return it as a pandas DataFrame (a table you can work with in Python).
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header"><span class="fname">src/data_loader.py</span><span class="lang">Python</span></div>
+    <pre><span class="cmt"># ─── Line 1: Import the pandas library ───</span>
+<span class="cmt"># pandas is THE data manipulation library in Python</span>
+<span class="cmt"># It gives us DataFrames — think Excel tables in code</span>
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cmt"># ─── Line 2-3: Define the load_data function ───</span>
+<span class="cmt"># This function takes a file path (like "data/raw/ipo_data.csv")</span>
+<span class="cmt"># and returns a DataFrame with all the CSV data inside it</span>
+<span class="kw">def</span> <span class="fn">load_data</span>(path):
+    <span class="cmt"># pd.read_csv() is pandas' built-in function to read CSV files</span>
+    <span class="cmt"># It automatically:</span>
+    <span class="cmt">#   - Reads the first row as column headers</span>
+    <span class="cmt">#   - Reads each subsequent row as data</span>
+    <span class="cmt">#   - Guesses data types (numbers, text, dates)</span>
+    <span class="kw">return</span> pd.<span class="fn">read_csv</span>(path)</pre>
+  </div>
+
+  <div class="explain">
+    <h3>🔑 Why is this a separate file?</h3>
+    <p>Even though it's tiny, keeping it separate follows the <strong>Single Responsibility Principle</strong> — each file does ONE thing. If you later need to load data from an API or database instead of a CSV, you only change this one file.</p>
+    <div class="highlight"><strong>Input:</strong> A file path string (e.g., <code>"data/raw/ipo_data.csv"</code>)<br><strong>Output:</strong> A pandas DataFrame with 652 rows × 13 columns</div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- FILE 3: src/preprocessing.py -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="file-section" id="file-preprocess">
+  <div class="file-header">
+    <div class="file-icon py">PY</div>
+    <div>
+      <h2>src/preprocessing.py</h2>
+      <div class="path">D:\IPO-version1.1\src\preprocessing.py</div>
+    </div>
+  </div>
+
+  <div class="file-desc">
+    <strong>Purpose:</strong> Contains 5 cleaning functions that transform raw, messy data into clean, model-ready data. Each function handles one specific type of messiness in the data.
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header"><span class="fname">src/preprocessing.py</span><span class="lang">Python</span></div>
+    <pre><span class="cmt"># ─── Lines 1-2: Import libraries ───</span>
+<span class="kw">import</span> pandas <span class="kw">as</span> pd    <span class="cmt"># For DataFrame operations</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np     <span class="cmt"># For numerical operations (NaN, quantile, clip)</span>
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># FUNCTION 1: remove_duplicates</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">def</span> <span class="fn">remove_duplicates</span>(df):
+    <span class="cmt"># drop_duplicates() removes rows that are exact copies of other rows</span>
+    <span class="cmt"># e.g., if the same IPO appears twice, one copy is removed</span>
+    <span class="kw">return</span> df.<span class="fn">drop_duplicates</span>()
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># FUNCTION 2: clean_data — the main cleaning function</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">def</span> <span class="fn">clean_data</span>(df):
+    <span class="cmt"># Step A: Strip whitespace from column names</span>
+    <span class="cmt"># Sometimes CSV headers have trailing spaces like "Date " instead of "Date"</span>
+    <span class="cmt"># [c.strip() for c in df.columns] removes whitespace from every column name</span>
+    df.columns = [c.<span class="fn">strip</span>() <span class="kw">for</span> c <span class="kw">in</span> df.columns]
+
+    <span class="cmt"># Step B: Convert the "Date" column from text to actual date objects</span>
+    <span class="cmt"># errors="coerce" means if a date can't be parsed, it becomes NaT (Not a Time)</span>
+    <span class="cmt"># format='mixed' handles different date formats in the same column</span>
+    df[<span class="str">'Date'</span>] = pd.<span class="fn">to_datetime</span>(df[<span class="str">'Date'</span>], errors=<span class="str">"coerce"</span>, format=<span class="str">'mixed'</span>)
+
+    <span class="cmt"># Step C: Extract the year from each date and create a "Year" column</span>
+    <span class="cmt"># .dt.year accesses the year part of a datetime column</span>
+    df[<span class="str">'Year'</span>] = df[<span class="str">'Date'</span>].dt.year
+
+    <span class="cmt"># Step D: Convert text numbers to actual numbers</span>
+    <span class="cmt"># These columns should be numeric but might contain text like "N/A" or spaces</span>
+    numeric_cols = [<span class="str">'Issue_Size(crores)'</span>, <span class="str">'QIB'</span>, <span class="str">'HNI'</span>, <span class="str">'RII'</span>, <span class="str">'Total'</span>,
+                    <span class="str">'Offer Price'</span>, <span class="str">'List Price'</span>, <span class="str">'Listing Gain'</span>,
+                    <span class="str">'CMP(BSE)'</span>, <span class="str">'CMP(NSE)'</span>, <span class="str">'Current Gains'</span>]
+
+    <span class="cmt"># Loop through each column name in the list</span>
+    <span class="kw">for</span> c <span class="kw">in</span> numeric_cols:
+        <span class="cmt"># Check if this column actually exists in our DataFrame</span>
+        <span class="kw">if</span> c <span class="kw">in</span> df.columns:
+            <span class="cmt"># pd.to_numeric converts text to numbers</span>
+            <span class="cmt"># errors="coerce" turns unconvertible values into NaN (empty)</span>
+            df[c] = pd.<span class="fn">to_numeric</span>(df[c], errors=<span class="str">"coerce"</span>)
+
+    <span class="cmt"># Step E: Remove rows where the Date couldn't be parsed</span>
+    <span class="cmt"># ~df['Date'].isna() means "Date IS NOT empty"</span>
+    <span class="cmt"># The ~ symbol means "NOT" in pandas</span>
+    df = df[~df[<span class="str">'Date'</span>].<span class="fn">isna</span>()]
+
+    <span class="kw">return</span> df
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># FUNCTION 3: drop_unusable_rows</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">def</span> <span class="fn">drop_unusable_rows</span>(df):
+    <span class="cmt"># Step A: Remove rows where "Listing Gain" is missing (NaN)</span>
+    <span class="cmt"># This is our regression target — without it, we can't train or evaluate</span>
+    <span class="cmt"># .copy() creates a fresh copy so we don't modify the original data</span>
+    df = df[~df[<span class="str">'Listing Gain'</span>].<span class="fn">isna</span>()].<span class="fn">copy</span>()
+
+    <span class="cmt"># Step B: Remove rows where ALL subscription data is missing</span>
+    <span class="cmt"># These 4 columns tell us how much demand the IPO had</span>
+    sub_cols = [<span class="str">'QIB'</span>, <span class="str">'HNI'</span>, <span class="str">'RII'</span>, <span class="str">'Total'</span>]
+
+    <span class="cmt"># .notna().all(axis=1) checks: "Are ALL 4 columns non-empty for this row?"</span>
+    <span class="cmt"># We KEEP only rows where ALL subscription data exists</span>
+    df = df[df[sub_cols].<span class="fn">notna</span>().<span class="fn">all</span>(axis=<span class="num">1</span>)].<span class="fn">copy</span>()
+
+    <span class="cmt"># Step C: Fix data error where List Price is exactly 0</span>
+    <span class="cmt"># An IPO can't list at ₹0 — this is a data entry error</span>
+    <span class="cmt"># We replace 0 with NaN (missing) so it gets handled by fill_missing_values</span>
+    df.loc[df[<span class="str">'List Price'</span>] == <span class="num">0</span>, <span class="str">'List Price'</span>] = np.nan
+
+    <span class="cmt"># Reset the row index (0, 1, 2, ...) because we removed some rows</span>
+    <span class="cmt"># drop=True means don't add the old index as a column</span>
+    <span class="kw">return</span> df.<span class="fn">reset_index</span>(drop=<span class="kw">True</span>)
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># FUNCTION 4: fill_missing_values</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">def</span> <span class="fn">fill_missing_values</span>(df):
+    <span class="cmt"># Step A: Find all columns that contain numbers</span>
+    <span class="cmt"># select_dtypes(include=[np.number]) returns only numeric columns</span>
+    numeric_cols = df.<span class="fn">select_dtypes</span>(include=[np.number]).columns
+
+    <span class="cmt"># Step B: Fill empty cells with the column's median value</span>
+    <span class="cmt"># WHY median and not 0?</span>
+    <span class="cmt">#   - If Offer Price has a missing value and we fill it with 0,</span>
+    <span class="cmt">#     the model thinks that IPO was free — which corrupts the data</span>
+    <span class="cmt">#   - Median is the "middle value" — it represents the typical IPO</span>
+    <span class="cmt">#   - fillna(value) replaces all NaN/NaT cells with the given value</span>
+    <span class="kw">for</span> c <span class="kw">in</span> numeric_cols:
+        df[c] = df[c].<span class="fn">fillna</span>(df[c].<span class="fn">median</span>())
+
+    <span class="kw">return</span> df
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># FUNCTION 5: winsorize_outliers</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">def</span> <span class="fn">winsorize_outliers</span>(df, cols=<span class="kw">None</span>, lower=<span class="num">0.01</span>, upper=<span class="num">0.99</span>):
+    <span class="cmt"># If no specific columns given, use these 5 columns</span>
+    <span class="cmt"># These are the columns most likely to have extreme outliers</span>
+    <span class="kw">if</span> cols <span class="kw">is</span> <span class="kw">None</span>:
+        cols = [<span class="str">'Issue_Size(crores)'</span>, <span class="str">'QIB'</span>, <span class="str">'HNI'</span>, <span class="str">'RII'</span>, <span class="str">'Total'</span>]
+
+    <span class="kw">for</span> c <span class="kw">in</span> cols:
+        <span class="kw">if</span> c <span class="kw">in</span> df.columns:
+            <span class="cmt"># quantile(0.01) = the value below which 1% of data falls</span>
+            <span class="cmt"># quantile(0.99) = the value below which 99% of data falls</span>
+            lo, hi = df[c].<span class="fn">quantile</span>(lower), df[c].<span class="fn">quantile</span>(upper)
+
+            <span class="cmt"># clip(lo, hi) caps values: anything below lo becomes lo,</span>
+            <span class="cmt"># anything above hi becomes hi. This removes extreme outliers</span>
+            <span class="cmt"># while keeping the rest of the data unchanged.</span>
+            <span class="cmt"># Example: if HNI has a value of 999x but the 99th percentile</span>
+            <span class="cmt"># is 200x, it gets capped to 200x.</span>
+            df[c] = df[c].<span class="fn">clip</span>(lo, hi)
+
+    <span class="kw">return</span> df</pre>
+  </div>
+
+  <div class="explain">
+    <h3>🔑 Why Winsorization?</h3>
+    <p>One IPO might have 500x HNI subscription while the median is 15x. Without capping, this extreme value would dominate the model's training. Winsorization <strong>caps the tails</strong> without removing the data point entirely.</p>
+    <div class="highlight"><strong>Data flow:</strong> Raw CSV (652 rows) → after cleaning (648 rows) — we lost 4 rows due to missing critical data.</div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- FILE 4: src/feature_engineering.py -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="file-section" id="file-feat">
+  <div class="file-header">
+    <div class="file-icon py">PY</div>
+    <div>
+      <h2>src/feature_engineering.py</h2>
+      <div class="path">D:\IPO-version1.1\src\feature_engineering.py</div>
+    </div>
+  </div>
+
+  <div class="file-desc">
+    <strong>Purpose:</strong> Creates new columns (features) from existing data that help the ML models make better predictions. The raw data alone isn't enough — we need to transform it into forms that reveal patterns.
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header"><span class="fname">src/feature_engineering.py</span><span class="lang">Python</span></div>
+    <pre><span class="cmt"># ─── Imports ───</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np      <span class="cmt"># For mathematical functions (log1p, NaN)</span>
+<span class="kw">import</span> pandas <span class="kw">as</span> pd    <span class="cmt"># For DataFrame operations</span>
+
+<span class="cmt"># ─── Constant: the 4 subscription columns ───</span>
+<span class="cmt"># These appear in multiple functions, so we define them once here</span>
+SUBSCRIPTION_COLS = [<span class="str">'QIB'</span>, <span class="str">'HNI'</span>, <span class="str">'RII'</span>, <span class="str">'Total'</span>]
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># FUNCTION 1: add_listing_gain</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">def</span> <span class="fn">add_listing_gain</span>(df):
+    <span class="cmt"># If the column already exists, don't recalculate it</span>
+    <span class="kw">if</span> <span class="str">'Listing Gain'</span> <span class="kw">in</span> df.columns:
+        <span class="kw">return</span> df
+
+    <span class="cmt"># Formula: ((Listing Price - Offer Price) / Offer Price) × 100</span>
+    <span class="cmt"># Example: Offer Price = ₹100, List Price = ₹150</span>
+    <span class="cmt">#          Listing Gain = ((150 - 100) / 100) × 100 = 50%</span>
+    df[<span class="str">"Listing Gain"</span>] = ((df[<span class="str">"List Price"</span>] - df[<span class="str">"Offer Price"</span>]) /
+                          df[<span class="str">"Offer Price"</span>]) * <span class="num">100</span>
+    <span class="kw">return</span> df
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># FUNCTION 2: add_subscription_class — creates the classification target</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">def</span> <span class="fn">add_subscription_class</span>(df, low=<span class="num">2.0</span>, high=<span class="num">10.0</span>):
+    <span class="cmt"># This inner function classifies ONE IPO's subscription level</span>
+    <span class="kw">def</span> <span class="fn">classify</span>(x):
+        <span class="kw">if</span> x &lt; low:       <span class="cmt"># Total &lt; 2x → "Low" (not many people applied)</span>
+            <span class="kw">return</span> <span class="str">'Low'</span>
+        <span class="kw">if</span> x &lt; high:      <span class="cmt"># 2x ≤ Total &lt; 10x → "Medium" (moderate demand)</span>
+            <span class="kw">return</span> <span class="str">'Medium'</span>
+        <span class="kw">return</span> <span class="str">'High'</span>      <span class="cmt"># Total ≥ 10x → "High" (everyone wants it!)</span>
+
+    <span class="cmt"># .apply(classify) runs the classify function on EVERY row's "Total" value</span>
+    <span class="cmt"># This creates a new column "Subscription_Class" with the result</span>
+    df[<span class="str">'Subscription_Class'</span>] = df[<span class="str">'Total'</span>].<span class="fn">apply</span>(classify)
+    <span class="kw">return</span> df
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># FUNCTION 3: add_log_features — the MOST IMPORTANT feature engineering</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">def</span> <span class="fn">add_log_features</span>(df):
+    <span class="cmt"># WHY log transform?</span>
+    <span class="cmt"># Subscription data is heavily right-skewed:</span>
+    <span class="cmt">#   - Most IPOs: 5x–30x subscription</span>
+    <span class="cmt">#   - Some IPOs: 200x+ subscription (extremely hot IPOs)</span>
+    <span class="cmt"># Without log: the 200x IPO dominates the model's training</span>
+    <span class="cmt"># With log: log1p(200) = 5.3, log1p(20) = 3.0 — much more balanced</span>
+
+    <span class="cmt"># np.log1p(x) = ln(x + 1). The +1 handles zeros (log(0) = undefined)</span>
+    <span class="kw">for</span> c <span class="kw">in</span> SUBSCRIPTION_COLS:
+        df[<span class="str">f'log_{c}'</span>] = np.<span class="fn">log1p</span>(df[c])
+        <span class="cmt"># Creates: log_QIB, log_HNI, log_RII, log_Total</span>
+
+    <span class="cmt"># Also log-transform issue size and offer price</span>
+    <span class="cmt"># Issue sizes range from ₹10cr to ₹20,000cr — huge spread</span>
+    df[<span class="str">'log_Issue_Size'</span>] = np.<span class="fn">log1p</span>(df[<span class="str">'Issue_Size(crores)'</span>])
+    df[<span class="str">'log_Offer_Price'</span>] = np.<span class="fn">log1p</span>(df[<span class="str">'Offer Price'</span>])
+
+    <span class="kw">return</span> df
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># FUNCTION 4: add_demand_ratios — relative demand features</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">def</span> <span class="fn">add_demand_ratios</span>(df):
+    <span class="cmt"># Total demand = sum of all 4 subscription columns</span>
+    <span class="cmt"># .replace(0, np.nan) prevents division by zero</span>
+    total_demand = df[SUBSCRIPTION_COLS].<span class="fn">sum</span>(axis=<span class="num">1</span>).<span class="fn">replace</span>(<span class="num">0</span>, np.nan)
+
+    <span class="cmt"># QIB_share: What % of total demand came from institutional investors?</span>
+    <span class="cmt"># High QIB share → institutions are confident → likely good IPO</span>
+    df[<span class="str">'QIB_share'</span>] = df[<span class="str">'QIB'</span>] / total_demand
+
+    <span class="cmt"># RII_share: What % came from retail investors?</span>
+    df[<span class="str">'RII_share'</span>] = df[<span class="str">'RII'</span>] / total_demand
+
+    <span class="cmt"># HNI_to_QIB: Ratio of rich individual demand to institutional demand</span>
+    <span class="cmt"># High ratio → retail frenzy (might be overhyped)</span>
+    df[<span class="str">'HNI_to_QIB'</span>] = df[<span class="str">'HNI'</span>] / df[<span class="str">'QIB'</span>].<span class="fn">replace</span>(<span class="num">0</span>, np.nan)
+
+    <span class="cmt"># Issue_Price_Ratio: How big is the offering vs its price?</span>
+    <span class="cmt"># Large issue + high price = mega-cap IPO (different dynamics)</span>
+    df[<span class="str">'Issue_Price_Ratio'</span>] = df[<span class="str">'Issue_Size(crores)'</span>] / df[<span class="str">'Offer Price'</span>].<span class="fn">replace</span>(<span class="num">0</span>, np.nan)
+
+    <span class="kw">return</span> df
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># FUNCTION 5: add_all_features — convenience wrapper</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">def</span> <span class="fn">add_all_features</span>(df):
+    <span class="cmt"># Applies BOTH log transforms AND demand ratios in one call</span>
+    <span class="cmt"># Nested function calls: first add_log_features runs, then add_demand_ratios</span>
+    <span class="kw">return</span> <span class="fn">add_demand_ratios</span>(<span class="fn">add_log_features</span>(df))</pre>
+  </div>
+
+  <div class="explain">
+    <h3>🔑 Why Log Transform? (Visual Example)</h3>
+    <div class="highlight">
+      <strong>Before log:</strong> [5, 8, 12, 200, 350] — the 200 and 350 dominate<br>
+      <strong>After log1p:</strong> [1.8, 2.2, 2.5, 5.3, 5.9] — much more balanced!<br><br>
+      <strong>np.log1p(5)</strong> = ln(6) = 1.79<br>
+      <strong>np.log1p(350)</strong> = ln(351) = 5.86<br>
+      <strong>np.log1p(0)</strong> = ln(1) = 0 (safe — no errors from zeros!)
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- FILE 5: src/models_classification.py -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="file-section" id="file-class">
+  <div class="file-header">
+    <div class="file-icon py">PY</div>
+    <div>
+      <h2>src/models_classification.py</h2>
+      <div class="path">D:\IPO-version1.1\src\models_classification.py</div>
+    </div>
+  </div>
+
+  <div class="file-desc">
+    <strong>Purpose:</strong> Trains 3 different machine learning models to predict whether an IPO will be <strong>Low, Medium, or High</strong> demand. Uses an <strong>out-of-time split</strong> — trains on IPOs up to 2023, tests on 2024–2026 IPOs (simulating real future prediction).
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header"><span class="fname">src/models_classification.py (highlights)</span><span class="lang">Python</span></div>
+    <pre><span class="cmt"># ─── Imports ───</span>
+<span class="kw">import</span> os
+<span class="kw">import</span> matplotlib
+matplotlib.<span class="fn">use</span>(<span class="str">'Agg'</span>)  <span class="cmt"># Use non-interactive backend (no popup windows)</span>
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+<span class="kw">import</span> seaborn <span class="kw">as</span> sns
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cmt"># The 3 ML models we'll compare</span>
+<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> <span class="fn">LogisticRegression</span>
+<span class="kw">from</span> sklearn.ensemble <span class="kw">import</span> <span class="fn">RandomForestClassifier</span>
+<span class="kw">from</span> sklearn.svm <span class="kw">import</span> <span class="fn">SVC</span>
+<span class="cmt"># Metrics to evaluate model performance</span>
+<span class="kw">from</span> sklearn.metrics <span class="kw">import</span> (<span class="fn">accuracy_score</span>, <span class="fn">classification_report</span>,
+                           <span class="fn">confusion_matrix</span>, <span class="fn">f1_score</span>,
+                           <span class="fn">precision_score</span>, <span class="fn">recall_score</span>)
+<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> <span class="fn">GridSearchCV</span>  <span class="cmt"># Auto-tunes hyperparameters</span>
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> <span class="fn">StandardScaler</span>  <span class="cmt"># Normalizes features to same scale</span>
+
+<span class="cmt"># ─── Constants ───</span>
+<span class="cmt"># Only 3 features for classification — known BEFORE the IPO opens</span>
+<span class="cmt"># (We can't use subscription data because that IS the target we're predicting)</span>
+FEATURES = [<span class="str">'Issue_Size(crores)'</span>, <span class="str">'Offer Price'</span>, <span class="str">'Year'</span>]
+TARGET = <span class="str">'Subscription_Class'</span>
+CLASS_ORDER = [<span class="str">'Low'</span>, <span class="str">'Medium'</span>, <span class="str">'High'</span>]
+SPLIT_YEAR = <span class="num">2023</span>  <span class="cmt"># Train on ≤2023, test on >2023</span>
+
+
+<span class="kw">def</span> <span class="fn">run_classification</span>(df, outdir=<span class="str">"reports/figures"</span>, split_year=SPLIT_YEAR):
+    <span class="cmt"># ─── Create output directory if it doesn't exist ───</span>
+    os.<span class="fn">makedirs</span>(outdir, exist_ok=<span class="kw">True</span>)
+
+    <span class="cmt"># ─── Prepare X (inputs) and y (target) ───</span>
+    <span class="cmt"># .dropna() removes rows where any FEATURE or TARGET is missing</span>
+    data = df.<span class="fn">dropna</span>(subset=FEATURES + [TARGET]).<span class="fn">copy</span>()
+    X = data[FEATURES]  <span class="cmt"># The 3 input columns</span>
+    y = data[TARGET]    <span class="cmt"># The "Low"/"Medium"/"High" column</span>
+
+    <span class="cmt"># ─── OUT-OF-TIME SPLIT ───</span>
+    <span class="cmt"># This is CRUCIAL — instead of random split, we split by YEAR:</span>
+    <span class="cmt">#   Train: all IPOs from 2010–2023</span>
+    <span class="cmt">#   Test:  all IPOs from 2024–2026</span>
+    <span class="cmt"># This simulates real prediction: can the model predict FUTURE IPOs?</span>
+    train_mask = data[<span class="str">'Year'</span>] &lt;= split_year
+    X_train, X_test = X[train_mask], X[~train_mask]
+    y_train, y_test = y[train_mask], y[~train_mask]
+
+    <span class="cmt"># ─── SCALING ───</span>
+    <span class="cmt"># StandardScaler normalizes all features to mean=0, std=1</span>
+    <span class="cmt"># WHY? Issue Size is in crores (100-5000), Offer Price in ₹ (10-2000),</span>
+    <span class="cmt"># Year is 2010-2026 — vastly different scales!</span>
+    <span class="cmt"># Without scaling, the model would think larger numbers = more important</span>
+    scaler = <span class="fn">StandardScaler</span>()
+    X_train_s = scaler.<span class="fn">fit_transform</span>(X_train)  <span class="cmt"># Learn scale from training data</span>
+    X_test_s = scaler.<span class="fn">transform</span>(X_test)         <span class="cmt"># Apply same scale to test data</span>
+
+    <span class="cmt"># ─── DEFINE 3 MODELS WITH HYPERPARAMETER GRIDS ───</span>
+    models = {
+        <span class="str">'Logistic Regression'</span>: (
+            <span class="fn">LogisticRegression</span>(max_iter=<span class="num">2000</span>, class_weight=<span class="str">'balanced'</span>,
+                               random_state=<span class="num">42</span>),
+            {<span class="str">'C'</span>: [<span class="num">0.1</span>, <span class="num">1</span>, <span class="num">10</span>]}  <span class="cmt"># C controls regularization strength</span>
+        ),
+        <span class="str">'Random Forest'</span>: (
+            <span class="fn">RandomForestClassifier</span>(class_weight=<span class="str">'balanced'</span>, random_state=<span class="num">42</span>),
+            {<span class="str">'n_estimators'</span>: [<span class="num">100</span>, <span class="num">200</span>],  <span class="cmt"># How many trees?</span>
+             <span class="str">'max_depth'</span>: [<span class="kw">None</span>, <span class="num">10</span>]}     <span class="cmt"># How deep each tree?</span>
+        ),
+        <span class="str">'SVM'</span>: (
+            <span class="fn">SVC</span>(class_weight=<span class="str">'balanced'</span>, random_state=<span class="num">42</span>),
+            {<span class="str">'C'</span>: [<span class="num">0.1</span>, <span class="num">1</span>, <span class="num">10</span>],
+             <span class="str">'kernel'</span>: [<span class="str">'rbf'</span>, <span class="str">'linear'</span>]}  <span class="cmt"># Two different boundary shapes</span>
+        ),
+    }
+
+    <span class="cmt"># ─── TRAIN AND EVALUATE EACH MODEL ───</span>
+    <span class="kw">for</span> name, (model, grid) <span class="kw">in</span> models.items():
+        <span class="cmt"># GridSearchCV tries every combination of hyperparameters</span>
+        <span class="cmt"># cv=5 means 5-fold cross-validation (tests on 20% of training data)</span>
+        gs = <span class="fn">GridSearchCV</span>(model, grid, cv=<span class="num">5</span>, scoring=<span class="str">'accuracy'</span>, n_jobs=-<span class="num">1</span>)
+        gs.<span class="fn">fit</span>(X_train_s, y_train)  <span class="cmt"># Train on training data</span>
+
+        best = gs.best_estimator_  <span class="cmt"># The best hyperparameter combo</span>
+        y_pred = best.<span class="fn">predict</span>(X_test_s)  <span class="cmt"># Predict on UNSEEN test data</span>
+
+        <span class="cmt"># Print detailed report</span>
+        <span class="bi">print</span>(<span class="fn">classification_report</span>(y_test, y_pred,
+                                 target_names=CLASS_ORDER))
+
+        <span class="cmt"># Generate confusion matrix plot</span>
+        cm = <span class="fn">confusion_matrix</span>(y_test, y_pred, labels=CLASS_ORDER)
+        plt.<span class="fn">figure</span>(figsize=(<span class="num">6</span>, <span class="num">5</span>))
+        sns.<span class="fn">heatmap</span>(cm, annot=<span class="kw">True</span>, fmt=<span class="str">'d'</span>, cmap=<span class="str">'Blues'</span>,
+                    xticklabels=CLASS_ORDER, yticklabels=CLASS_ORDER)
+        plt.<span class="fn">savefig</span>(<span class="str">f"</span>{outdir}<span class="str>/cm_</span>{name.<span class="fn">replace</span>(<span class="str">' '</span>, <span class="str">'_'</span>).<span class="fn">lower</span>()}<span class="str>.png"</span>, dpi=<span class="num">150</span>)
+        plt.<span class="fn">close</span>()
+
+    <span class="cmt"># ─── FEATURE IMPORTANCE ───</span>
+    <span class="cmt"># Random Forest naturally tells us which features matter most</span>
+    rf = <span class="fn">RandomForestClassifier</span>(n_estimators=<span class="num">200</span>, class_weight=<span class="str">'balanced'</span>,
+                                random_state=<span class="num">42</span>).<span class="fn">fit</span>(X_train_s, y_train)
+    imp = pd.<span class="fn">Series</span>(rf.feature_importances_, index=FEATURES).<span class="fn">sort_values</span>(ascending=<span class="kw">False</span>)
+    <span class="bi">print</span>(<span class="str">"Random Forest feature importance:"</span>)
+    <span class="bi">print</span>(imp.<span class="fn">round</span>(<span class="num">4</span>).<span class="fn">to_string</span>())</pre>
+  </div>
+
+  <div class="explain">
+    <h3>🔑 Key Concepts</h3>
+    <ul>
+      <li><strong>class_weight='balanced':</strong> Tells the model to pay extra attention to rare classes. Without this, the model would just predict "Medium" for everything (since Medium is most common) and get ~40% accuracy by ignoring Low and High entirely.</li>
+      <li><strong>GridSearchCV:</strong> Instead of guessing the best settings, it tries ALL combinations and picks the one with highest cross-validation accuracy. Like trying every combination lock until one opens.</li>
+      <li><strong>StandardScaler.fit_transform vs transform:</strong> fit_transform = "learn the scale + apply it" (training only). transform = "apply the SAME scale" (test data). Never fit on test data — that's cheating!</li>
+    </ul>
+    <div class="highlight"><strong>Why out-of-time split?</strong> A random 80/20 split would leak future information (a 2025 IPO in training helps predict a 2024 IPO). The time split ensures the model can ONLY use past data to predict the future — exactly like real life.</div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- FILE 6: src/models_regression.py -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="file-section" id="file-reg">
+  <div class="file-header">
+    <div class="file-icon py">PY</div>
+    <div>
+      <h2>src/models_regression.py</h2>
+      <div class="path">D:\IPO-version1.1\src\models_regression.py</div>
+    </div>
+  </div>
+
+  <div class="file-desc">
+    <strong>Purpose:</strong> Trains 5 regression models to predict the exact <strong>listing gain percentage</strong> (e.g., +45.3% on day 1). Uses 6 log-transformed features including subscription data.
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header"><span class="fname">src/models_regression.py (highlights)</span><span class="lang">Python</span></div>
+    <pre><span class="cmt"># ─── Imports ───</span>
+<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> <span class="fn">HuberRegressor</span>, <span class="fn">LinearRegression</span>
+<span class="kw">from</span> sklearn.tree <span class="kw">import</span> <span class="fn">DecisionTreeRegressor</span>
+<span class="kw">from</span> sklearn.ensemble <span class="kw">import</span> <span class="fn">RandomForestRegressor</span>, <span class="fn">GradientBoostingRegressor</span>
+<span class="kw">from</span> sklearn.metrics <span class="kw">import</span> <span class="fn">mean_absolute_error</span>, <span class="fn">mean_squared_error</span>, <span class="fn">r2_score</span>
+<span class="kw">from</span> src.feature_engineering <span class="kw">import</span> <span class="fn">add_log_features</span>
+
+<span class="cmt"># 6 features — ALL log-transformed (includes subscription data)</span>
+<span class="cmt"># Unlike classification, here we CAN use subscription data</span>
+<span class="cmt"># because we're predicting AFTER bidding closes</span>
+FEATURES = [<span class="str">'log_QIB'</span>, <span class="str">'log_HNI'</span>, <span class="str">'log_RII'</span>, <span class="str">'log_Total'</span>,
+            <span class="str">'log_Issue_Size'</span>, <span class="str">'log_Offer_Price'</span>]
+TARGET = <span class="str">'Listing Gain'</span>
+SPLIT_YEAR = <span class="num">2023</span>
+
+
+<span class="kw">def</span> <span class="fn">run_regression</span>(df, outdir=<span class="str">"reports/figures"</span>, split_year=SPLIT_YEAR):
+    <span class="cmt"># ─── Add log features to the data ───</span>
+    df = <span class="fn">add_log_features</span>(df)
+
+    <span class="cmt"># ─── Same out-of-time split pattern as classification ───</span>
+    data = df.<span class="fn">dropna</span>(subset=FEATURES + [TARGET]).<span class="fn">copy</span>()
+    X, y = data[FEATURES], data[TARGET]
+    train_mask = data[<span class="str">'Year'</span>] &lt;= split_year
+    X_train, X_test = X[train_mask], X[~train_mask]
+    y_train, y_test = y[train_mask], y[~train_mask]
+
+    <span class="cmt"># ─── Scale features ───</span>
+    scaler = <span class="fn">StandardScaler</span>()
+    X_train_s = scaler.<span class="fn">fit_transform</span>(X_train)
+    X_test_s = scaler.<span class="fn">transform</span>(X_test)
+
+    <span class="cmt"># ─── 5 Regression Models ───</span>
+    models = {
+        <span class="str">'Huber Regression'</span>: (
+            <span class="fn">HuberRegressor</span>(max_iter=<span class="num">5000</span>),
+            {<span class="str">'alpha'</span>: [<span class="num">1e-3</span>, <span class="num">1e-2</span>], <span class="str">'epsilon'</span>: [<span class="num">1.35</span>, <span class="num">1.7</span>]}
+            <span class="cmt"># alpha = regularization strength</span>
+            <span class="cmt"># epsilon = how tolerant of outliers (higher = more robust)</span>
+        ),
+        <span class="str">'Linear Regression'</span>: (<span class="fn">LinearRegression</span>(), {}),
+        <span class="str">'Decision Tree'</span>: (
+            <span class="fn">DecisionTreeRegressor</span>(random_state=<span class="num">42</span>),
+            {<span class="str">'max_depth'</span>: [<span class="num">5</span>, <span class="num">10</span>, <span class="kw">None</span>]}
+        ),
+        <span class="str">'Random Forest'</span>: (
+            <span class="fn">RandomForestRegressor</span>(random_state=<span class="num">42</span>),
+            {<span class="str">'n_estimators'</span>: [<span class="num">100</span>, <span class="num">200</span>], <span class="str">'max_depth'</span>: [<span class="kw">None</span>, <span class="num">10</span>]}
+        ),
+        <span class="str">'Gradient Boosting'</span>: (
+            <span class="fn">GradientBoostingRegressor</span>(random_state=<span class="num">42</span>),
+            {<span class="str">'n_estimators'</span>: [<span class="num">100</span>, <span class="num">200</span>], <span class="str">'learning_rate'</span>: [<span class="num">0.05</span>, <span class="num">0.1</span>]}
+        ),
+    }
+
+    <span class="cmt"># ─── Train, evaluate, collect metrics ───</span>
+    <span class="kw">for</span> name, (model, grid) <span class="kw">in</span> models.items():
+        <span class="kw">if</span> grid:
+            gs = <span class="fn">GridSearchCV</span>(model, grid, cv=<span class="num">5</span>,
+                           scoring=<span class="str">'neg_mean_squared_error'</span>, n_jobs=-<span class="num">1</span>)
+            gs.<span class="fn">fit</span>(X_train_s, y_train)
+            best = gs.best_estimator_
+        <span class="kw">else</span>:
+            best = model.<span class="fn">fit</span>(X_train_s, y_train)
+
+        y_pred = best.<span class="fn">predict</span>(X_test_s)
+
+        <span class="cmt"># Three regression metrics:</span>
+        <span class="cmt"># RMSE: Root Mean Squared Error (lower = better, in same units as target)</span>
+        <span class="cmt"># MAE: Mean Absolute Error (average of |predicted - actual|)</span>
+        <span class="cmt"># R²: How much variance the model explains (1.0 = perfect, 0.0 = average)</span>
+        rmse = <span class="fn">mean_squared_error</span>(y_test, y_pred) ** <span class="num">0.5</span>
+        mae = <span class="fn">mean_absolute_error</span>(y_test, y_pred)
+        r2 = <span class="fn">r2_score</span>(y_test, y_pred)
+
+        <span class="bi">print</span>(<span class="str">f"</span>{name}<span class="str"> — RMSE: </span>{rmse:<span class="num">.3</span>}<span class="str"> | MAE: </span>{mae:<span class="num">.3</span>}<span class="str"> | R²: </span>{r2:<span class="num">.4</span>}<span class="str">"</span>)
+
+    <span class="cmt"># ─── Feature importance from best tree model ───</span>
+    <span class="kw">for</span> name, (model, _) <span class="kw">in</span> models.items():
+        <span class="kw">if</span> name <span class="kw">in</span> (<span class="str">'Random Forest'</span>, <span class="str">'Gradient Boosting'</span>):
+            imp = pd.<span class="fn">Series</span>(model.feature_importances_,
+                           index=FEATURES).<span class="fn">sort_values</span>(ascending=<span class="kw">False</span>)
+            <span class="cmt"># Save feature importance chart</span>
+            plt.<span class="fn">figure</span>(figsize=(<span class="num">8</span>, <span class="num">5</span>))
+            imp.<span class="fn">plot</span>(kind=<span class="str">'barh'</span>)
+            plt.<span class="fn">savefig</span>(<span class="str">f"</span>{outdir}<span class="str>/feature_importance.png"</span>, dpi=<span class="num">150</span>)</pre>
+  </div>
+
+  <div class="explain">
+    <h3>🔑 Why Huber Regression Wins</h3>
+    <ul>
+      <li><strong>Linear Regression</strong> is sensitive to outliers — one extreme IPO can skew the whole model.</li>
+      <li><strong>Huber Regression</strong> is a hybrid: it behaves like linear regression for normal points but like robust regression for outliers. Best of both worlds.</li>
+      <li><strong>R² of ~0.30</strong> seems low, but IPO listing gains are extremely noisy (influenced by market sentiment, news, GMP rumors). Explaining 30% of variance with just 6 numbers is actually decent.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- FILE 7: src/eda.py -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="file-section" id="file-eda">
+  <div class="file-header">
+    <div class="file-icon py">PY</div>
+    <div>
+      <h2>src/eda.py</h2>
+      <div class="path">D:\IPO-version1.1\src\eda.py</div>
+    </div>
+  </div>
+
+  <div class="file-desc">
+    <strong>Purpose:</strong> Generates 3 static visualization charts for Exploratory Data Analysis (EDA). These charts help you UNDERSTAND the data before building models.
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header"><span class="fname">src/eda.py</span><span class="lang">Python</span></div>
+    <pre><span class="kw">import</span> os
+<span class="kw">import</span> matplotlib
+matplotlib.<span class="fn">use</span>(<span class="str">'Agg'</span>)
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+<span class="kw">import</span> seaborn <span class="kw">as</span> sns
+
+<span class="cmt"># Columns used in the correlation heatmap</span>
+MODEL_COLS = [<span class="str">'Issue_Size(crores)'</span>, <span class="str">'QIB'</span>, <span class="str">'HNI'</span>, <span class="str">'RII'</span>, <span class="str">'Total'</span>,
+              <span class="str">'Offer Price'</span>, <span class="str">'List Price'</span>, <span class="str">'Listing Gain'</span>]
+
+
+<span class="kw">def</span> <span class="fn">run_eda</span>(df, outdir=<span class="str">"reports/figures"</span>):
+    <span class="cmt"># Create output folder</span>
+    os.<span class="fn">makedirs</span>(outdir, exist_ok=<span class="kw">True</span>)
+
+    <span class="cmt"># ─── CHART 1: Correlation Heatmap ───</span>
+    <span class="cmt"># Shows how strongly each pair of columns is related</span>
+    <span class="cmt"># Values range from -1 (opposite) to +1 (same direction)</span>
+    <span class="cmt"># e.g., if QIB and Listing Gain have correlation 0.70,</span>
+    <span class="cmt"># it means high institutional demand → high listing gain</span>
+    corr = df[MODEL_COLS].<span class="fn">corr</span>()
+    plt.<span class="fn">figure</span>(figsize=(<span class="num">10</span>, <span class="num">8</span>))
+    sns.<span class="fn">heatmap</span>(corr, annot=<span class="kw">True</span>, cmap=<span class="str">'coolwarm'</span>, fmt=<span class="str">'.2f'</span>,
+                linewidths=<span class="num">0.5</span>)
+    plt.<span class="fn">title</span>(<span class="str">'Correlation Heatmap - IPO Features'</span>)
+    plt.<span class="fn">tight_layout</span>()
+    plt.<span class="fn">savefig</span>(<span class="str">f"</span>{outdir}<span class="str>/correlation_heatmap.png"</span>, dpi=<span class="num">150</span>)
+    plt.<span class="fn">close</span>()
+
+    <span class="cmt"># ─── CHART 2: Target Distributions ───</span>
+    <span class="cmt"># Shows the shape of our two target variables</span>
+    <span class="cmt"># Left: Total subscription (most IPOs are 5x-30x, few are 200x+)</span>
+    <span class="cmt"># Right: Listing Gain (most cluster around 0-50%, some extreme)</span>
+    fig, axes = plt.<span class="fn">subplots</span>(<span class="num">1</span>, <span class="num">2</span>, figsize=(<span class="num">12</span>, <span class="num">4</span>))
+    sns.<span class="fn">histplot</span>(df[<span class="str">'Total'</span>], bins=<span class="num">50</span>, kde=<span class="kw">True</span>, ax=axes[<span class="num">0</span>])
+    axes[<span class="num">0</span>].<span class="fn">set_title</span>(<span class="str">'Total Subscription Distribution (times)'</span>)
+    sns.<span class="fn">histplot</span>(df[<span class="str">'Listing Gain'</span>], bins=<span class="num">50</span>, kde=<span class="kw">True</span>, ax=axes[<span class="num">1</span>])
+    axes[<span class="num">1</span>].<span class="fn">set_title</span>(<span class="str">'Listing Gain Distribution (%)'</span>)
+    plt.<span class="fn">tight_layout</span>()
+    plt.<span class="fn">savefig</span>(<span class="str">f"</span>{outdir}<span class="str>/distributions.png"</span>, dpi=<span class="num">150</span>)
+    plt.<span class="fn">close</span>()
+
+    <span class="cmt"># ─── CHART 3: Class Balance ───</span>
+    <span class="cmt"># Shows how many IPOs fall into each subscription tier</span>
+    <span class="cmt"># Important for checking class imbalance</span>
+    <span class="cmt"># If one class dominates, the model might just always predict that class</span>
+    <span class="kw">if</span> <span class="str">'Subscription_Class'</span> <span class="kw">in</span> df.columns:
+        plt.<span class="fn">figure</span>(figsize=(<span class="num">10</span>, <span class="num">8</span>))
+        sns.<span class="fn">countplot</span>(x=<span class="str">'Subscription_Class'</span>, data=df,
+                    order=[<span class="str">'Low'</span>, <span class="str">'Medium'</span>, <span class="str">'High'</span>])
+        plt.<span class="fn">title</span>(<span class="str">'Subscription Class Balance'</span>)
+        plt.<span class="fn">tight_layout</span>()
+        plt.<span class="fn">savefig</span>(<span class="str">f"</span>{outdir}<span class="str>/class_balance.png"</span>, dpi=<span class="num">150</span>)
+        plt.<span class="fn">close</span>()
+
+    <span class="cmt"># ─── Print summary to console ───</span>
+    <span class="bi">print</span>(<span class="str">f"Total IPOs: </span>{<span class="bi">len</span>(df)}<span class="str">"</span>)
+    <span class="bi">print</span>(<span class="str">f"Subscription classes:\n</span>{df[<span class="str">'Subscription_Class'</span>].<span class="fn">value_counts</span>().<span class="fn">to_string</span>()}<span class="str">"</span>)
+    top = corr[<span class="str">'Listing Gain'</span>].<span class="fn">drop</span>(<span class="str">'Listing Gain'</span>).<span class="fn">sort_values</span>(ascending=<span class="kw">False</span>)
+    <span class="bi">print</span>(<span class="str">"Top correlations with Listing Gain:"</span>)
+    <span class="bi">print</span>(top.<span class="fn">round</span>(<span class="num">3</span>).<span class="fn">to_string</span>())</pre>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- FILE 8: predict_ipo.py -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="file-section" id="file-predict">
+  <div class="file-header">
+    <div class="file-icon py">PY</div>
+    <div>
+      <h2>predict_ipo.py</h2>
+      <div class="path">D:\IPO-version1.1\predict_ipo.py</div>
+    </div>
+  </div>
+
+  <div class="file-desc">
+    <strong>Purpose:</strong> The bridge between training and deployment. This file trains both models, caches them to disk (so the dashboard starts instantly), and provides the prediction functions that <code>app.py</code> calls. Also includes a standalone CLI predictor.
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header"><span class="fname">predict_ipo.py (highlights)</span><span class="lang">Python</span></div>
+    <pre><span class="cmt"># ─── Feature lists (used by both app.py and this file) ───</span>
+<span class="cmt"># CLASS_FEATURES: Only 3 pre-IPO features for tier prediction</span>
+CLASS_FEATURES = [<span class="str">'log_Issue_Size'</span>, <span class="str">'log_Offer_Price'</span>, <span class="str">'Year'</span>]
+
+<span class="cmt"># GAIN_FEATURES: 6 features including subscription data for gain prediction</span>
+GAIN_FEATURES = [<span class="str">'log_QIB'</span>, <span class="str">'log_HNI'</span>, <span class="str">'log_RII'</span>, <span class="str">'log_Total'</span>,
+                 <span class="str">'log_Issue_Size'</span>, <span class="str">'log_Offer_Price'</span>]
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># FUNCTION 1: load_training_data — tries cache, falls back to rebuild</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">def</span> <span class="fn">load_training_data</span>():
+    <span class="kw">try</span>:
+        <span class="cmt"># Try loading the already-cleaned CSV</span>
+        df = pd.<span class="fn">read_csv</span>(<span class="str">"data/processed/cleaned_ipo_data.csv"</span>)
+        <span class="kw">if</span> <span class="str">'Subscription_Class'</span> <span class="kw">not in</span> df.columns:
+            <span class="kw">raise</span> <span class="fn">FileNotFoundError</span>  <span class="cmt"># Missing the target column</span>
+        <span class="kw">return</span> df
+    <span class="kw">except</span> (<span class="fn">FileNotFoundError</span>, pd.errors.<span class="fn">EmptyDataError</span>):
+        <span class="cmt"># If cleaned file doesn't exist, rebuild from raw CSV</span>
+        <span class="cmt"># This runs the ENTIRE cleaning pipeline again</span>
+        df = pd.<span class="fn">read_csv</span>(<span class="str">"data/raw/ipo_data.csv"</span>)
+        df = <span class="fn">clean_data</span>(df)
+        df = <span class="fn">drop_unusable_rows</span>(df)
+        df = <span class="fn">fill_missing_values</span>(df)
+        df = <span class="fn">winsorize_outliers</span>(df)
+        df = <span class="fn">add_subscription_class</span>(df)
+        df.<span class="fn">to_csv</span>(<span class="str">"data/processed/cleaned_ipo_data.csv"</span>, index=<span class="kw">False</span>)
+        <span class="kw">return</span> df
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># FUNCTION 2: engineer_input — converts raw user input to model features</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">def</span> <span class="fn">engineer_input</span>(issue_size, offer_price, year, qib, hni, rii, total):
+    <span class="cmt"># Takes the raw numbers the user types in the form</span>
+    <span class="cmt"># and applies the SAME log1p transform the training data had</span>
+    <span class="kw">return</span> {
+        <span class="str">'log_Issue_Size'</span>: np.<span class="fn">log1p</span>(issue_size),
+        <span class="str">'log_Offer_Price'</span>: np.<span class="fn">log1p</span>(offer_price),
+        <span class="str">'Year'</span>: year,
+        <span class="str">'log_QIB'</span>: np.<span class="fn">log1p</span>(qib),
+        <span class="str">'log_HNI'</span>: np.<span class="fn">log1p</span>(hni),
+        <span class="str">'log_RII'</span>: np.<span class="fn">log1p</span>(rii),
+        <span class="str">'log_Total'</span>: np.<span class="fn">log1p</span>(total),
+    }
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># FUNCTION 3: train_models — trains and CACHES both models</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+MODEL_PATH = <span class="str">"models/ipo_models.joblib"</span>
+
+<span class="kw">def</span> <span class="fn">_data_fingerprint</span>():
+    <span class="cmt"># Creates an MD5 hash of the cleaned CSV file</span>
+    <span class="cmt"># Used to detect if the data has changed since the models were cached</span>
+    <span class="kw">with</span> <span class="bi">open</span>(<span class="str">"data/processed/cleaned_ipo_data.csv"</span>, <span class="str">"rb"</span>) <span class="kw">as</span> f:
+        <span class="kw">return</span> hashlib.<span class="fn">md5</span>(f.<span class="fn">read</span>()).<span class="fn">hexdigest</span>()
+
+
+<span class="kw">def</span> <span class="fn">train_models</span>(df, use_cache=<span class="kw">True</span>):
+    fp = <span class="fn">_data_fingerprint</span>()
+
+    <span class="cmt"># If cached models exist AND data hasn't changed → load from disk</span>
+    <span class="kw">if</span> use_cache <span class="kw">and</span> os.<span class="fn">path.exists</span>(MODEL_PATH):
+        <span class="kw">try</span>:
+            saved = joblib.<span class="fn">load</span>(MODEL_PATH)
+            <span class="kw">if</span> saved.<span class="fn">get</span>(<span class="str">"data_fp"</span>) == fp:
+                <span class="kw">return</span> (saved[<span class="str">"clf"</span>], saved[<span class="str">"scaler_clf"</span>],
+                        saved[<span class="str">"reg"</span>], saved[<span class="str">"scaler_reg"</span>])
+        <span class="kw">except</span> <span class="fn">Exception</span>:
+            <span class="kw">pass</span>  <span class="cmt"># Corrupt cache → retrain</span>
+
+    <span class="cmt"># ─── TRAIN CLASSIFIER ───</span>
+    df = <span class="fn">add_log_features</span>(df)
+    clf = <span class="fn">RandomForestClassifier</span>(n_estimators=<span class="num">100</span>, max_depth=<span class="num">4</span>,
+                                 class_weight=<span class="str">'balanced'</span>, random_state=<span class="num">42</span>)
+    scaler_clf = <span class="fn">StandardScaler</span>()
+    clf.<span class="fn">fit</span>(scaler_clf.<span class="fn">fit_transform</span>(df[CLASS_FEATURES]),
+          df[<span class="str">'Subscription_Class'</span>])
+
+    <span class="cmt"># ─── TRAIN REGRESSOR ───</span>
+    reg = <span class="fn">GridSearchCV</span>(<span class="fn">HuberRegressor</span>(max_iter=<span class="num">5000</span>),
+                       {<span class="str">'alpha'</span>: [<span class="num">1e-3</span>, <span class="num">1e-2</span>], <span class="str">'epsilon'</span>: [<span class="num">1.35</span>, <span class="num">1.7</span>]},
+                       cv=<span class="num">5</span>, scoring=<span class="str">'neg_mean_squared_error'</span>, n_jobs=-<span class="num">1</span>)
+    scaler_reg = <span class="fn">StandardScaler</span>()
+    reg.<span class="fn">fit</span>(scaler_reg.<span class="fn">fit_transform</span>(df[GAIN_FEATURES]),
+          df[<span class="str">'Listing Gain'</span>])
+    reg = reg.best_estimator_  <span class="cmt"># Use the best hyperparameter combo</span>
+
+    <span class="cmt"># ─── CACHE TO DISK ───</span>
+    <span class="cmt"># joblib.dump saves the trained models as a binary file</span>
+    <span class="cmt"># Next time app.py starts, it loads this file instantly</span>
+    os.<span class="fn">makedirs</span>(os.path.<span class="fn">dirname</span>(MODEL_PATH) <span class="kw">or</span> <span class="str">"."</span>, exist_ok=<span class="kw">True</span>)
+    joblib.<span class="fn">dump</span>({
+        <span class="str">"clf"</span>: clf, <span class="str">"scaler_clf"</span>: scaler_clf,
+        <span class="str">"reg"</span>: reg, <span class="str">"scaler_reg"</span>: scaler_reg,
+        <span class="str">"data_fp"</span>: fp
+    }, MODEL_PATH)
+
+    <span class="kw">return</span> clf, scaler_clf, reg, scaler_reg</pre>
+  </div>
+
+  <div class="explain">
+    <h3>🔑 The Caching System</h3>
+    <div class="highlight">
+      <strong>First run:</strong> Train models (takes ~3-5 seconds) → save to <code>models/ipo_models.joblib</code><br>
+      <strong>Every subsequent run:</strong> Load from disk (instant!) → skip training<br>
+      <strong>When data changes:</strong> MD5 hash no longer matches → auto-retrain<br><br>
+      <strong>Why?</strong> The Streamlit dashboard would be slow if it retrained on every page refresh. Caching makes the app start in &lt;1 second.
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- FILE 9: app.py -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="file-section" id="file-app">
+  <div class="file-header">
+    <div class="file-icon py">PY</div>
+    <div>
+      <h2>app.py</h2>
+      <div class="path">D:\IPO-version1.1\app.py (1,792 lines — the largest file)</div>
+    </div>
+  </div>
+
+  <div class="file-desc">
+    <strong>Purpose:</strong> The Streamlit dashboard — the entire frontend UI. It's a single Python file that generates all 4 tabs (Predictor, Data & EDA, Model Performance, About) with custom CSS, JavaScript, Plotly charts, and interactive widgets. Run with <code>streamlit run app.py</code>.
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header"><span class="fname">app.py — Section Breakdown</span><span class="lang">Python</span></div>
+    <pre><span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># SECTION 1: IMPORTS & CONFIG (Lines 1-40)</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">import</span> os
+<span class="kw">import</span> altair <span class="kw">as</span> alt      <span class="cmt"># For lightweight charts (bar charts, donuts)</span>
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> streamlit <span class="kw">as</span> st   <span class="cmt"># THE web framework — turns Python into a web app</span>
+
+<span class="cmt"># Optional imports with fallbacks</span>
+<span class="kw">import</span> importlib.util
+SHAP_OK = importlib.util.<span class="fn">find_spec</span>(<span class="str">"shap"</span>) <span class="kw">is not</span> <span class="kw">None</span>  <span class="cmt"># Is SHAP installed?</span>
+<span class="kw">try</span>:
+    <span class="kw">import</span> plotly.express <span class="kw">as</span> px
+    PLOTLY_OK = <span class="kw">True</span>
+<span class="kw">except</span> <span class="fn">ImportError</span>:
+    PLOTLY_OK = <span class="kw">False</span>  <span class="cmt"># Fall back to static charts</span>
+
+<span class="cmt"># Import functions from predict_ipo.py</span>
+<span class="kw">from</span> predict_ipo <span class="kw">import</span> (CLASS_FEATURES, CLASS_ORDER, GAIN_FEATURES,
+                         engineer_input, load_training_data, train_models)
+
+<span class="cmt"># ─── Page configuration ───</span>
+st.<span class="fn">set_page_config</span>(
+    page_title=<span class="str">"IPO Predictor"</span>,
+    page_icon=<span class="str">"📈"</span>,
+    layout=<span class="str">"wide"</span>,  <span class="cmt"># Full-width layout</span>
+    initial_sidebar_state=<span class="str">"expanded"</span>,
+)
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># SECTION 2: THEME SYSTEM (Lines 42-100)</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># Three complete color palettes, each defining 25+ CSS variables</span>
+<span class="cmt"># Switching themes changes EVERY color in the app instantly</span>
+THEMES = {
+    <span class="str">"Charcoal (dark)"</span>: {<span class="str">"bg"</span>: <span class="str">"#18181C"</span>, <span class="str">"accent"</span>: <span class="str">"#A855F7"</span>, ...},
+    <span class="str">"Midnight (blue)"</span>: {<span class="str">"bg"</span>: <span class="str">"#0B1120"</span>, <span class="str">"accent"</span>: <span class="str">"#38BDF8"</span>, ...},
+    <span class="str">"Emerald (dark)"</span>:  {<span class="str">"bg"</span>: <span class="str">"#0E1A14"</span>, <span class="str">"accent"</span>: <span class="str">"#34D399"</span>, ...},
+}
+
+<span class="cmt"># Read the currently selected theme from session state</span>
+<span class="cmt"># (defaults to "Charcoal" on first visit)</span>
+theme = st.session_state.<span class="fn">get</span>(<span class="str">"theme_picker"</span>, <span class="str">"Charcoal (dark)"</span>)
+CH = THEMES[theme]
+
+<span class="cmt"># Four font presets: heading font + body font pairs</span>
+FONTS = {
+    <span class="str">"Modern Sans"</span>:  {<span class="str">"head"</span>: <span class="str">"'Space Grotesk'"</span>, <span class="str">"body"</span>: <span class="str">"'Inter'"</span>},
+    <span class="str">"Elegant Serif"</span>: {<span class="str">"head"</span>: <span class="str">"'Playfair Display'"</span>, <span class="str">"body"</span>: <span class="str">"'Lora'"</span>},
+    <span class="str">"Tech Mono"</span>:    {<span class="str">"head"</span>: <span class="str">"'Orbitron'"</span>, <span class="str">"body"</span>: <span class="str">"'JetBrains Mono'"</span>},
+    <span class="str">"Data Terminal"</span>: {<span class="str">"head"</span>: <span class="str">"'Fira Sans'"</span>, <span class="str">"body"</span>: <span class="str">"'Fira Code'"</span>},
+}
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># SECTION 3: NAVIGATION JAVASCRIPT (Lines 102-170)</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># NAV_JS: ~70 lines of JavaScript injected into the page</span>
+<span class="cmt"># Handles: nav link clicks, tab switching, active pill sync,</span>
+<span class="cmt"># hero stat count-up animation, and crossfade without doubling</span>
+
+<span class="cmt"># KEY: The native st.tabs is the SINGLE SOURCE OF TRUTH</span>
+<span class="cmt"># Nav links click ONLY the matching native tab — ONE click = ONE rerun</span>
+<span class="cmt"># This prevents the old bug of navbar/hero doubling</span>
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># SECTION 4: CUSTOM CSS (Lines 172-600)</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># ~430 lines of CSS that style EVERY element in the app:</span>
+<span class="cmt"># - Ticker tape (scrolling IPO list at the top)</span>
+<span class="cmt"># - Sticky navbar with active pill</span>
+<span class="cmt"># - Hero banner with gradient background</span>
+<span class="cmt"># - KPI strip (metric cards)</span>
+<span class="cmt"># - Cards with 3D hover tilt + dashed ring animation</span>
+<span class="cmt"># - Badges (Low=red, Medium=purple, High=green)</span>
+<span class="cmt"># - Tables, buttons, expanders</span>
+<span class="cmt"># - Responsive breakpoints (900px, 720px, 520px)</span>
+<span class="cmt"># - Font family overrides (the .stApp * selector)</span>
+<span class="cmt"># - Skeleton shimmer for 3D chart loading</span>
+<span class="cmt"># - Mobile zoom buttons for 3D scatter</span>
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># SECTION 5: CURSOR GLOW (Lines 602-630)</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># Creates a soft purple radial gradient that follows the mouse</span>
+<span class="cmt"># Uses requestAnimationFrame for smooth 60fps animation</span>
+<span class="cmt"># The glow has an "easing" factor (0.14) so it smoothly trails</span>
+<span class="cmt"># behind the cursor instead of snapping to it</span>
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># SECTION 6: 3D WIDGET (Lines 632-730)</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># Pure CSS 3D rotating IPO market visualization:</span>
+<span class="cmt"># - 12 bars arranged in a circle (each rotated 30°)</span>
+<span class="cmt"># - Bars pulse up/down with staggered timing</span>
+<span class="cmt"># - 26 floating particle dots</span>
+<span class="cmt"># - User can drag to rotate manually</span>
+<span class="cmt"># - Auto-rotates when not being dragged</span>
+<span class="cmt"># - Two glowing orbital rings</span>
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># SECTION 7: DATA & MODEL LOADING (Lines 732-760)</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="dec">@st.cache_resource</span>(show_spinner=<span class="kw">False</span>)
+<span class="kw">def</span> <span class="fn">get_data_and_models</span>():
+    <span class="cmt"># This function's result is CACHED by Streamlit</span>
+    <span class="cmt"># It only re-runs when the app restarts</span>
+    df = <span class="fn">load_training_data</span>()
+    clf, scaler_clf, reg, scaler_reg = <span class="fn">train_models</span>(df)
+    <span class="kw">return</span> df, clf, scaler_clf, reg, scaler_reg
+
+<span class="cmt"># Show splash screen while models load (first run only)</span>
+<span class="cmt"># SPLASH_HTML: branded loading animation with progress bar</span>
+<span class="kw">if</span> <span class="kw">not</span> st.session_state.<span class="fn">get</span>(<span class="str">"_models_ready"</span>):
+    splash = st.<span class="fn">empty</span>()
+    splash.<span class="fn">markdown</span>(SPLASH_HTML, unsafe_allow_html=<span class="kw">True</span>)
+    <span class="kw">try</span>:
+        df, clf, scaler_clf, reg, scaler_reg = <span class="fn">get_data_and_models</span>()
+    <span class="kw">finally</span>:
+        splash.<span class="fn">empty</span>()  <span class="cmt"># Remove splash when done</span>
+    st.session_state[<span class="str">"_models_ready"</span>] = <span class="kw">True</span>
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># SECTION 8: EXPLAINABILITY FUNCTIONS (Lines 762-790)</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">def</span> <span class="fn">explain_gain</span>(issue_size, offer_price, year, qib, hni, rii, total):
+    <span class="cmt"># For the linear gain model: predicted = intercept + Σ(coef × value)</span>
+    <span class="cmt"># This function returns the baseline (intercept) and each feature's</span>
+    <span class="cmt"># individual contribution — so users see WHY the model predicted what it did</span>
+    eng = <span class="fn">engineer_input</span>(issue_size, offer_price, year, qib, hni, rii, total)
+    row = scaler_reg.<span class="fn">transform</span>(...)  <span class="cmt"># Scale the input</span>
+    contrib = {f: <span class="bi">float</span>(c * v) <span class="kw">for</span> f, c, v <span class="kw">in</span> <span class="bi">zip</span>(GAIN_FEATURES, reg.coef_, row)}
+    <span class="kw">return</span> <span class="bi">float</span>(reg.intercept_), contrib
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># SECTION 9: CHART BUILDERS (Lines 792-830)</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+_FIG_VERSION = <span class="str">"v5"</span>  <span class="cmt"># Bump this when chart code changes to invalidate cache</span>
+
+<span class="dec">@st.cache_data</span>(show_spinner=<span class="kw">False</span>)
+<span class="kw">def</span> <span class="fn">build_3d_scatter_fig</span>(df, color_mode, pt, cbg, cf, ct, cg, accent, head_font, body_font, _ver=_FIG_VERSION):
+    <span class="cmt"># Builds the animated 3D scatter plot (the most complex chart)</span>
+    <span class="cmt"># Uses plotly.express for 3D scatter with animation frames by year</span>
+    <span class="cmt"># Cached so it only builds once per theme/font/color combination</span>
+    fig = px.<span class="fn">scatter_3d</span>(
+        df_anim, x=<span class="str">"log_Total"</span>, y=<span class="str">"log_Issue_Size"</span>, z=<span class="str">"Listing Gain"</span>,
+        color=color_col, animation_frame=<span class="str">"frame"</span>, ...
+    )
+    fig.<span class="fn">update_layout</span>(dragmode=<span class="str">"pan"</span>, ...)  <span class="cmt"># Allow rotate/zoom</span>
+    <span class="kw">return</span> fig
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># SECTION 10: HTML COMPONENT BUILDERS (Lines 832-1050)</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">def</span> <span class="fn">hero_html</span>(df):
+    <span class="cmt"># Returns the hero banner HTML with:</span>
+    <span class="cmt"># - Badge: "AI-POWERED · 648 IPOs · 2010–2026"</span>
+    <span class="cmt"># - Headline with gradient text</span>
+    <span class="cmt"># - SVG area chart art</span>
+    <span class="cmt"># - 3 floating stat chips with count-up animation</span>
+
+<span class="kw">def</span> <span class="fn">ticker_html</span>(df, n=<span class="num">26</span>):
+    <span class="cmt"># Scrolling ticker tape showing recent IPOs and their gains</span>
+    <span class="cmt"># Duplicated items create infinite scroll effect</span>
+
+<span class="kw">def</span> <span class="fn">kpi_cards</span>(df):
+    <span class="cmt"># 4 KPI metrics: IPO count, avg gain, best accuracy, best R²</span>
+
+<span class="kw">def</span> <span class="fn">recent_ipo_table</span>(df, n=<span class="num">6</span>):
+    <span class="cmt"># Table of 6 most recent IPOs with color-coded tier badges</span>
+
+<span class="kw">def</span> <span class="fn">subscription_donut</span>(df):
+    <span class="cmt"># Altair donut chart: Low (red) / Medium (purple) / High (green)</span>
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># SECTION 11: SIDEBAR (Lines 1052-1120)</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">with</span> st.sidebar:
+    <span class="cmt"># Logo + brand name</span>
+    <span class="cmt"># Theme picker (radio buttons)</span>
+    <span class="cmt"># Font style picker (selectbox)</span>
+    <span class="cmt"># Dataset summary metrics</span>
+    <span class="cmt"># Subscription mix breakdown</span>
+    <span class="cmt"># Best model scores</span>
+    <span class="cmt"># Disclaimer</span>
+    <span class="cmt"># "Pro" promo card (decorative)</span>
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># SECTION 12: MAIN PAGE LAYOUT (Lines 1122-1160)</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+st.<span class="fn">markdown</span>(<span class="fn">ticker_html</span>(df), unsafe_allow_html=<span class="kw">True</span>)
+st.<span class="fn">markdown</span>(TOPNAV_HTML, unsafe_allow_html=<span class="kw">True</span>)  <span class="cmt"># Sticky navbar</span>
+st.<span class="fn">markdown</span>(<span class="fn">hero_html</span>(df), unsafe_allow_html=<span class="kw">True</span>)
+st.<span class="fn">html</span>(NAV_JS, unsafe_allow_javascript=<span class="kw">True</span>)
+st.<span class="fn">html</span>(SCROLL_FIX_HTML, ...)  <span class="cmt"># Preserves scroll across reruns</span>
+st.<span class="fn">markdown</span>(<span class="fn">kpi_cards</span>(df), unsafe_allow_html=<span class="kw">True</span>)
+
+<span class="cmt"># ─── Create 4 tabs (keyed for Python access) ───</span>
+tab_pred, tab_eda, tab_perf, tab_about = st.<span class="fn">tabs</span>(
+    [<span class="str">"🎯 Predictor"</span>, <span class="str">"📊 Data &amp; EDA"</span>, <span class="str">"🧠 Model"</span>, <span class="str">"ℹ️ About"</span>],
+    key=<span class="str">"active_tab"</span>, on_change=<span class="str">"rerun"</span>
+)
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># SECTION 13: TAB 1 — PREDICTOR (Lines 1162-1400)</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">with</span> tab_pred:
+    <span class="cmt"># 2-step progress indicator (Step 1: Pre-IPO, Step 2: Subscription)</span>
+    <span class="cmt"># 3D animated widget (pure CSS, in an iframe)</span>
+    <span class="cmt"># Left column: input form with "Try a real IPO" dropdown</span>
+    <span class="cmt"># Right column: prediction results</span>
+
+    <span class="cmt"># ─── "Try a real IPO" feature ───</span>
+    <span class="cmt"># Pick any IPO from the dataset → auto-fills all inputs</span>
+    <span class="cmt"># Shows predicted vs actual comparison</span>
+
+    <span class="cmt"># ─── Input widgets ───</span>
+    issue_size = st.<span class="fn">number_input</span>(<span class="str">"Issue size (₹ crores)"</span>, ...)
+    offer_price = st.<span class="fn">number_input</span>(<span class="str">"Offer price (₹)"</span>, ...)
+    year = st.<span class="fn">number_input</span>(<span class="str">"Year of listing"</span>, ...)
+    have_subs = st.<span class="fn">toggle</span>(<span class="str">"I have subscription numbers"</span>, ...)
+
+    <span class="cmt"># Step 2 inputs (only shown when toggle is ON)</span>
+    <span class="kw">if</span> have_subs:
+        qib = st.<span class="fn">number_input</span>(<span class="str">"QIB"</span>, ...)
+        hni = st.<span class="fn">number_input</span>(<span class="str">"HNI"</span>, ...)
+        rii = st.<span class="fn">number_input</span>(<span class="str">"RII"</span>, ...)
+        total = st.<span class="fn">number_input</span>(<span class="str">"Total"</span>, ...)
+
+    <span class="cmt"># ─── Predict button ───</span>
+    <span class="kw">if</span> st.<span class="fn">button</span>(<span class="str">"🚀 Predict this IPO"</span>):
+        tier, prob_dict = <span class="fn">predict_tier</span>(...)
+        <span class="kw">if</span> have_subs:
+            gain = <span class="fn">predict_gain</span>(...)
+            <span class="cmt"># Compute SHAP explanation for gain model</span>
+            baseline, contrib = <span class="fn">explain_gain</span>(...)
+        <span class="cmt"># Compute SHAP explanation for tier classifier</span>
+        <span class="kw">if</span> SHAP_OK:
+            tier_expl = <span class="fn">get_tree_explainer</span>()(row)
+
+    <span class="cmt"># ─── Results display ───</span>
+    <span class="cmt"># Tier card: badge + probability bar chart</span>
+    <span class="cmt"># Gain card: big number + confidence interval</span>
+    <span class="cmt"># Real IPO comparison: actual vs predicted</span>
+    <span class="cmt"># Explainability expander: SHAP waterfall charts</span>
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># SECTION 14: TAB 2 — DATA & EDA (Lines 1402-1580)</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">with</span> tab_eda:
+    <span class="cmt"># Market Overview row: donut + recent IPOs table</span>
+    <span class="cmt"># Auto-dismiss tooltip script (5s timer)</span>
+    <span class="cmt"># Average day-1 gain by year (Plotly area chart)</span>
+    <span class="cmt"># Interactive 3D playground (year-by-year animation)</span>
+    <span class="cmt">#   - Toggle: color by actual vs predicted tier</span>
+    <span class="cmt">#   - Mobile zoom buttons (+/−)</span>
+    <span class="cmt">#   - Tier legend inside the chart</span>
+    <span class="cmt"># Static EDA images: distributions, heatmap, class balance</span>
+    <span class="cmt"># Key insight callout box</span>
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># SECTION 15: TAB 3 — MODEL PERFORMANCE (Lines 1582-1680)</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">with</span> tab_perf:
+    <span class="cmt"># Two columns: Classification | Regression</span>
+    <span class="cmt"># Reads summary CSVs generated by main.py</span>
+    <span class="cmt"># Shows: accuracy table, confusion matrices</span>
+    <span class="cmt"># Shows: RMSE/MAE/R² table, feature importance chart</span>
+    <span class="cmt"># Insight boxes explaining the results</span>
+
+
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="cmt"># SECTION 16: TAB 4 — ABOUT (Lines 1682-1792)</span>
+<span class="cmt"># ═══════════════════════════════════════════════════════════════</span>
+<span class="kw">with</span> tab_about:
+    <span class="cmt"># Project description</span>
+    <span class="cmt"># Methodology (6 steps)</span>
+    <span class="cmt"># Dataset columns table</span>
+    <span class="cmt"># Team members table</span>
+    <span class="cmt"># Disclaimer</span></pre>
+  </div>
+
+  <div class="explain">
+    <h3>🔑 Streamlit Concepts You Need to Know</h3>
+    <ul>
+      <li><strong>st.session_state:</strong> A dictionary that persists across page reruns. When the user types in an input, Streamlit reruns the entire script — session_state preserves values between reruns.</li>
+      <li><strong>@st.cache_resource:</strong> A decorator that tells Streamlit to run this function ONCE and reuse the result forever (until app restart). Used for expensive operations like model training.</li>
+      <li><strong>@st.cache_data:</strong> Same as cache_resource but for data (DataFrames, charts). Invalidates when inputs change.</li>
+      <li><strong>st.markdown(..., unsafe_allow_html=True):</strong> Lets you inject raw HTML/CSS into the page. Used extensively for custom UI components.</li>
+      <li><strong>st.html(...):</strong> Injects JavaScript that runs in the MAIN page (not an iframe). Used for cursor glow, zoom buttons, tooltip auto-dismiss.</li>
+      <li><strong>st.iframe(...):</strong> Creates an isolated iframe for content. Used for the 3D CSS widget (needs its own scroll/sizing context).</li>
+      <li><strong>unsafe_allow_javascript=True:</strong> Allows JavaScript execution. Required for st.html() with scripts.</li>
+    </ul>
+  </div>
+
+  <div class="explain">
+    <h3>🔑 The CSS Architecture</h3>
+    <div class="highlight">
+      <strong>CSS Variables (--bg, --accent, etc.)</strong> are defined in <code>:root</code> with defaults. When a theme is selected, a second <code>&lt;style&gt;</code> block overrides ALL variables at once — the entire app recolors instantly without any JavaScript.<br><br>
+      <strong>Font variables (--font-head, --font-body)</strong> work the same way. Changing the font picker updates the CSS variables, and every element in the app inherits the new fonts.<br><br>
+      <strong>.stApp * { font-family: var(--font-body) !important; }</strong> — This aggressive selector forces ALL elements (including Streamlit's built-in widgets) to use the selected font.
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- FILE 10: requirements.txt -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="file-section" id="file-req">
+  <div class="file-header">
+    <div class="file-icon html">TXT</div>
+    <div>
+      <h2>requirements.txt</h2>
+      <div class="path">D:\IPO-version1.1\requirements.txt</div>
+    </div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header"><span class="fname">requirements.txt</span><span class="lang">Text</span></div>
+    <pre><span class="cmt"># ─── Install command: pip install -r requirements.txt ───</span>
+
+pandas           <span class="cmt"># Data manipulation (DataFrames, CSV I/O)</span>
+numpy            <span class="cmt"># Numerical operations (log, NaN, quantile)</span>
+scikit-learn     <span class="cmt"># Machine learning (models, metrics, scaling)</span>
+matplotlib       <span class="cmt"># Static chart generation (heatmaps, histograms)</span>
+seaborn          <span class="cmt"># Statistical visualization (built on matplotlib)</span>
+streamlit        <span class="cmt"># Web dashboard framework (turns Python → web app)</span>
+plotly           <span class="cmt"># Interactive charts (3D scatter, area charts)</span>
+altair           <span class="cmt"># Declarative charts (bar charts, donut, in results)</span>
+joblib           <span class="cmt"># Model caching (save/load trained models to disk)</span>
+shap             <span class="cmt"># SHAP explainability (shows WHY a prediction was made)</span></pre>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ═══════ SUMMARY ═══════ -->
+<div class="flow">
+  <h3>📋 Complete Data Flow Summary</h3>
+  <div class="flow-chart">
+<span class="box">STEP 1 — main.py</span>
+  <span class="desc">python main.py</span>
+  <span class="arrow">↓</span>
+<span class="box">data_loader.py</span> reads <span class="str">ipo_data.csv</span> → 652 rows × 13 cols
+  <span class="arrow">↓</span>
+<span class="box">preprocessing.py</span> cleans → 648 rows (4 removed)
+  <span class="desc">dates parsed, NaN filled, outliers capped</span>
+  <span class="arrow">↓</span>
+<span class="box">feature_engineering.py</span> adds columns
+  <span class="desc">log_QIB, log_HNI, log_RII, log_Total, Subscription_Class</span>
+  <span class="arrow">↓</span>
+<span class="box">eda.py</span> generates 3 PNG charts → <span class="desc">reports/figures/</span>
+  <span class="arrow">↓</span>
+<span class="box">models_classification.py</span> trains 3 classifiers → accuracy ~62%
+  <span class="arrow">↓</span>
+<span class="box">models_regression.py</span> trains 5 regressors → R² ~0.30
+  <span class="arrow">↓</span>
+<span class="box">OUTPUT:</span> cleaned CSV + summary CSVs + chart PNGs
+  <span class="arrow">↓</span>
+<span class="box">STEP 2 — streamlit run app.py</span>
+  <span class="desc">Loads trained models from disk instantly</span>
+  <span class="arrow">↓</span>
+<span class="box">predict_ipo.py</span> provides predict_tier() + predict_gain()
+  <span class="arrow">↓</span>
+<span class="box">app.py</span> renders the 4-tab dashboard
+  <span class="desc">Predictor | Data & EDA | Model Performance | About</span>
+  </div>
+</div>
+
+<div class="explain" style="margin-top:2rem;">
+  <h3>🎓 How to Explain This to Your Coordinator</h3>
+  <ul>
+    <li><strong>Start with:</strong> "We built a system that predicts two things about upcoming Indian IPOs — how much demand they'll get and how much they'll gain on day 1."</li>
+    <li><strong>The pipeline:</strong> "Data flows through 6 stages — load, clean, engineer features, explore, train models, deploy to dashboard."</li>
+    <li><strong>The split:</strong> "We train on IPOs up to 2023 and test on 2024–2026, so the model never sees the future — exactly like real prediction."</li>
+    <li><strong>The output:</strong> "The dashboard lets anyone enter IPO details and get instant predictions with explanations of why."</li>
+    <li><strong>Honest about limitations:</strong> "IPO markets are noisy — our gain model explains about 30% of variance, which is decent but not perfect. The tier classifier achieves ~62% accuracy on unseen future IPOs."</li>
+  </ul>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ─── Active nav highlight ───
+const navLinks = document.querySelectorAll('.topnav nav a');
+const sections = document.querySelectorAll('.file-section');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      navLinks.forEach(l => {
+        l.classList.toggle('active', l.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, { rootMargin: '-80px 0px -60% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

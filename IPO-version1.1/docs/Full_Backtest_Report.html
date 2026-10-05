@@ -1,0 +1,3431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Full Backtest Report — 210 IPOs (2024–2026)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  :root {
+    --bg:#0a0a0f;--bg2:#111118;--card:#16161e;--border:#232330;
+    --text:#e4e4e7;--text2:#a1a1aa;--dim:#71717a;--accent:#a855f7;
+    --accent2:#ec4899;--green:#22c55e;--red:#ef4444;--yellow:#eab308;
+    --blue:#3b82f6;--purple:#c084fc;--cyan:#06b6d4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+  body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;
+    background:radial-gradient(ellipse at 20% 20%,rgba(168,85,247,.06) 0%,transparent 50%),
+    radial-gradient(ellipse at 80% 80%,rgba(236,72,153,.04) 0%,transparent 50%);
+    animation:bgF 20s ease-in-out infinite;z-index:-1}
+  @keyframes bgF{0%,100%{transform:translate(0,0)}50%{transform:translate(2%,-1%)}}
+  .container{max-width:1300px;margin:0 auto;padding:40px 24px}
+
+  /* Hero */
+  .hero{text-align:center;padding:50px 0 30px}
+  .hero-badge{display:inline-block;padding:6px 16px;border-radius:20px;
+    background:linear-gradient(135deg,rgba(168,85,247,.15),rgba(236,72,153,.15));
+    border:1px solid rgba(168,85,247,.3);color:var(--purple);
+    font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px}
+  .hero h1{font-size:2.6rem;font-weight:900;
+    background:linear-gradient(135deg,#fff 0%,var(--accent) 50%,var(--accent2) 100%);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    line-height:1.2;margin-bottom:10px}
+  .hero p{color:var(--text2);font-size:1rem;max-width:640px;margin:0 auto}
+
+  /* Explanation boxes */
+  .explain-box {
+    background: linear-gradient(135deg, rgba(168,85,247,0.06), rgba(59,130,246,0.06));
+    border: 1px solid rgba(168,85,247,0.2);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    padding: 18px 22px;
+    margin: 16px 0;
+    font-size: .82rem;
+    color: var(--text2);
+    line-height: 1.8;
+  }
+  .explain-box strong { color: var(--text); }
+  .explain-box .term { color: var(--accent); font-weight: 700; }
+  .explain-box code {
+    background: rgba(168,85,247,0.12);
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    color: var(--purple);
+  }
+  .explain-box ul { margin: 8px 0 0 18px; }
+  .explain-box li { margin-bottom: 4px; }
+  .explain-box .example {
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    color: var(--text);
+  }
+
+  /* Mini explanation (inline) */
+  .mini-explain {
+    display: inline-block;
+    font-size: .7rem;
+    color: var(--dim);
+    font-style: italic;
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+
+  /* Summary row */
+  .summary-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin:32px 0}
+  .sc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;transition:all .3s;position:relative;overflow:hidden}
+  .sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0}
+  .sc:nth-child(1)::before{background:linear-gradient(90deg,var(--accent),var(--accent2))}
+  .sc:nth-child(2)::before{background:linear-gradient(90deg,var(--green),var(--cyan))}
+  .sc:nth-child(3)::before{background:linear-gradient(90deg,var(--yellow),var(--red))}
+  .sc:nth-child(4)::before{background:linear-gradient(90deg,var(--blue),var(--purple))}
+  .sc:nth-child(5)::before{background:linear-gradient(90deg,var(--cyan),var(--green))}
+  .sc:nth-child(6)::before{background:linear-gradient(90deg,var(--accent2),var(--accent))}
+  .sc:hover{transform:translateY(-3px);box-shadow:0 6px 24px rgba(168,85,247,.1)}
+  .sc .label{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:600;margin-bottom:6px}
+  .sc .value{font-size:2rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+  .sc .sub{font-size:.7rem;color:var(--dim);margin-top:4px}
+
+  /* Section title */
+  .st{font-size:1.35rem;font-weight:700;margin:44px 0 18px;display:flex;align-items:center;gap:10px}
+  .st .icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;background:linear-gradient(135deg,rgba(168,85,247,.2),rgba(236,72,153,.2));border:1px solid rgba(168,85,247,.3)}
+
+  /* Cards */
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px;transition:all .3s}
+  .card:hover{border-color:rgba(168,85,247,.3)}
+  .card h4{font-size:.85rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .card p{font-size:.82rem;color:var(--text2);line-height:1.7}
+  .hl{color:var(--accent);font-weight:600}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+  @media(max-width:768px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .mini{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}
+  .mini h5{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:600;margin-bottom:8px}
+  .mini .val{font-size:1.6rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+  .mini .sub{font-size:.7rem;color:var(--dim);margin-top:4px}
+  .mini-bar{height:6px;background:rgba(255,255,255,.05);border-radius:3px;margin-top:8px;overflow:hidden}
+  .mini-fill{height:100%;border-radius:3px}
+
+  .table-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--border);background:var(--card)}
+  table{width:100%;border-collapse:collapse;font-size:.78rem}
+  th{padding:12px 14px;text-align:left;font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);font-weight:600;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);position:sticky;top:0;z-index:1}
+  td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.03)}
+  tr:hover{background:rgba(168,85,247,.04)}
+  .td-name{font-weight:600;max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .td-num{font-family:'JetBrains Mono',monospace;white-space:nowrap}
+  .td-date{font-family:'JetBrains Mono',monospace;color:var(--dim);font-size:.72rem}
+  .td-center{text-align:center}
+
+  .tier-badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:6px;font-size:.68rem;font-weight:700;font-family:'JetBrains Mono',monospace}
+  .tier-badge.low{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.25)}
+  .tier-badge.medium{background:rgba(234,179,8,.12);color:#eab308;border:1px solid rgba(234,179,8,.25)}
+  .tier-badge.high{background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.25)}
+
+  .hist-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .hist-label{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--dim);width:80px;flex-shrink:0;text-align:right}
+  .hist-track{flex:1;height:22px;background:rgba(255,255,255,.03);border-radius:6px;overflow:hidden}
+  .hist-fill{height:100%;border-radius:6px;transition:width 1s ease}
+  .hist-val{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--text2);width:70px;flex-shrink:0}
+  .hist-pct{color:var(--dim)}
+
+  .filter-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+  .filter-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:.72rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+  .filter-btn:hover,.filter-btn.active{background:rgba(168,85,247,.15);border-color:rgba(168,85,247,.4);color:var(--accent)}
+  .search-box{padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:.8rem;width:260px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
+  .search-box:focus{border-color:var(--accent)}
+
+  .bottom-banner{text-align:center;padding:40px 24px;margin-top:32px;border-top:1px solid var(--border);color:var(--dim);font-size:.75rem}
+  .bottom-banner strong{color:var(--text2)}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  .sc{animation:fadeUp .5s ease backwards}
+  .sc:nth-child(1){animation-delay:.05s}.sc:nth-child(2){animation-delay:.1s}.sc:nth-child(3){animation-delay:.15s}
+  .sc:nth-child(4){animation-delay:.2s}.sc:nth-child(5){animation-delay:.25s}.sc:nth-child(6){animation-delay:.3s}
+
+  ::-webkit-scrollbar{width:5px;height:5px}
+  ::-webkit-scrollbar-track{background:var(--bg)}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+  @media(max-width:600px){
+    .hero h1{font-size:1.7rem}.sc .value{font-size:1.5rem}
+    .container{padding:20px 14px}.search-box{width:100%}
+    .table-wrap{max-height:600px;overflow-y:auto}
+    .explain-box{padding:14px 16px;font-size:.78rem}
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <!-- HERO -->
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <div class="hero">
+    <div class="hero-badge">🔬 Full Backtest Report — Out-of-Time Test</div>
+    <h1>210 IPOs Predicted. How Close Were We?</h1>
+    <p>Every IPO from <strong>2024–2026</strong> that was NOT seen during training. This is the real-world test of how our ML model performs on new, unseen data.</p>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <!-- GLOSSARY — What do these terms mean? -->
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <div class="st"><div class="icon">📖</div> Glossary — What Do These Terms Mean?</div>
+
+  <div class="explain-box">
+    <strong>Before we dive into the numbers, here's a quick guide to every term you'll see in this report:</strong>
+    <br><br>
+
+    <strong><span class="term">IPO</span> (Initial Public Offering)</strong> — When a private company first sells its shares to the public on the stock exchange. Think of it like a new product launch, but for company ownership.
+    <br><br>
+
+    <strong><span class="term">Listing Gain</span></strong> — The percentage change between the <em>offer price</em> (what you paid during the IPO) and the <em>list price</em> (the first trading price on the exchange). A positive listing gain means the stock opened higher than what you paid — you made money on day one. A negative gain means you lost money.
+    <div class="example">
+      Example: Offer price = ₹100, List price = ₹115 → Listing Gain = <strong style="color:#22c55e">+15%</strong> ✅<br>
+      Example: Offer price = ₹100, List price = ₹85 → Listing Gain = <strong style="color:#ef4444">-15%</strong> ❌
+    </div>
+    <br>
+
+    <strong><span class="term">Subscription Tier</span> (Low / Medium / High)</strong> — How much demand there is for an IPO. When more people apply for shares than what's available, the IPO is "oversubscribed." We classify this into 3 buckets:
+    <ul>
+      <li><span style="color:#ef4444;font-weight:700">🔴 Low</span> — Total subscription <strong>below 2x</strong>. Few people applied. The IPO might list at a loss.</li>
+      <li><span style="color:#eab308;font-weight:700">🟡 Medium</span> — Total subscription <strong>between 2x and 10x</strong>. Moderate interest. Decent chance of gain.</li>
+      <li><span style="color:#22c55e;font-weight:700">🟢 High</span> — Total subscription <strong>above 10x</strong>. Everyone wants it! Very likely to list with big gains.</li>
+    </ul>
+    <div class="example">
+      "Total = 25x" means 25 times more shares were applied for than what was available. Very hot IPO!
+    </div>
+    <br>
+
+    <strong><span class="term">Tier Accuracy</span></strong> — Out of all IPOs we tested, what percentage did the model correctly classify into the right tier (Low/Medium/High)?
+    <div class="example">
+      If 100 IPOs were tested and the model got 70 of them right → Tier Accuracy = <strong>70%</strong>
+    </div>
+    <br>
+
+    <strong><span class="term">Direction Accuracy</span></strong> — Did the model correctly predict whether the stock would go <strong>up or down</strong> on listing day? This is simpler than predicting the exact gain — it just asks: "Did you get the direction right?"
+    <div class="example">
+      Actual: +12% (up), Predicted: +8% (up) → Direction ✅ correct<br>
+      Actual: -5% (down), Predicted: +3% (up) → Direction ❌ wrong
+    </div>
+    <br>
+
+    <strong><span class="term">Gain Error (pp)</span></strong> — How far off was the predicted gain from the actual gain, measured in <strong>percentage points (pp)</strong>. A "percentage point" is the simple difference between two percentages.
+    <div class="example">
+      Actual gain = +5%, Predicted gain = +13% → Error = <strong>8pp</strong> (the model was 8 percentage points too high)<br>
+      Actual gain = -10%, Predicted gain = -3% → Error = <strong>7pp</strong> (the model was 7pp too optimistic)
+    </div>
+    <br>
+
+    <strong><span class="term">Out-of-Time Split</span></strong> — We trained the model on IPOs from <strong>2010–2023</strong> and tested it on IPOs from <strong>2024–2026</strong>. This simulates what would happen in real life — you build the model with past data, then use it to predict the future. If we tested on the same data we trained on, the results would be artificially good (like studying for an exam with the answer key).
+    <br><br>
+
+    <strong><span class="term">QIB / HNI / RII / Total</span></strong> — Different types of investors who apply for an IPO:
+    <ul>
+      <li><strong>QIB</strong> (Qualified Institutional Buyer) — Big institutions like mutual funds and banks. Their subscription ratio shows how much big money wants in.</li>
+      <li><strong>HNI</strong> (High Net-worth Individual) — Wealthy individual investors applying for large amounts (₹2 lakh+).</li>
+      <li><strong>RII</span> (Retail Individual Investor) — Regular people like you and me applying for smaller amounts.</li>
+      <li><strong>Total</strong> — The overall subscription ratio across all investor types combined.</li>
+    </ul>
+    <br>
+
+    <strong><span class="term">Issue Size</span></strong> — Total value of shares being sold in the IPO, measured in <strong>₹ crores</strong>. A larger issue size means the company is raising more money. (1 crore = 10 million rupees.)
+    <br><br>
+
+    <strong><span class="term">Offer Price</span></strong> — The price per share set by the company for the IPO. This is what investors pay during the bidding process.
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <!-- HOW THIS TEST WORKS -->
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <div class="st"><div class="icon">🧪</div> How This Test Works</div>
+  <div class="explain-box">
+    <strong>Think of it like this:</strong> We have <strong>648 IPOs</strong> of historical data (2010–2026). We split them like an exam:
+    <br><br>
+    📚 <strong>Training set (438 IPOs, years 2010–2023)</strong> — The model studied these IPOs to learn patterns. It saw their issue sizes, prices, subscription numbers, and listing gains. It learned things like "IPOs with high QIB subscription tend to list higher."
+    <br><br>
+    🧪 <strong>Test set (210 IPOs, years 2024–2026)</strong> — The model has <strong>never seen these IPOs before</strong>. We feed it the inputs (issue size, price, year, subscription numbers) and ask it to predict. Then we compare its predictions with what actually happened. This is the real measure of whether the model works.
+    <br><br>
+    Why? Because in real life, you'll use this model to predict <em>future</em> IPOs that haven't happened yet. If the model only works on data it has already seen, it's useless.
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <!-- SUMMARY CARDS -->
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <div class="st"><div class="icon">📊</div> Overall Results</div>
+
+  <div class="explain-box">
+    These 6 numbers summarize how our model performed across all 210 unseen IPOs. Scroll down for detailed breakdowns.
+  </div>
+
+  <div class="summary-row">
+    <div class="sc">
+      <div class="label">IPOs Tested</div>
+      <div class="value" style="color:var(--accent);">210</div>
+      <div class="sub">2024–2026 (all unseen)</div>
+    </div>
+    <div class="sc">
+      <div class="label">Tier Accuracy</div>
+      <div class="value" style="color:var(--green);">68.6%</div>
+      <div class="sub">144/210 correct tier</div>
+    </div>
+    <div class="sc">
+      <div class="label">Direction Accuracy</div>
+      <div class="value" style="color:var(--cyan);">76.7%</div>
+      <div class="sub">161/210 got up/down right</div>
+    </div>
+    <div class="sc">
+      <div class="label">Avg Gain Error</div>
+      <div class="value" style="color:var(--yellow);">±15.81</div>
+      <div class="sub">percentage points off</div>
+    </div>
+    <div class="sc">
+      <div class="label">Within ±10pp</div>
+      <div class="value" style="color:var(--blue);">45.2%</div>
+      <div class="sub">close predictions</div>
+    </div>
+    <div class="sc">
+      <div class="label">Within ±20pp</div>
+      <div class="value" style="color:var(--purple);">75.7%</div>
+      <div class="sub">reasonable predictions</div>
+    </div>
+  </div>
+
+  <div class="explain-box">
+    <strong>How to read these:</strong><br>
+    • <strong>Tier Accuracy 68.6%</strong> means the model correctly predicted the subscription tier (Low/Medium/High) for about 7 out of every 10 IPOs. Random guessing would give 33% (since there are 3 tiers). So 68.6% is significantly better than guessing.<br>
+    • <strong>Direction Accuracy 76.7%</strong> means the model correctly predicted whether the stock would go up or down on listing day about 3 out of 4 times.<br>
+    • <strong>Avg Gain Error ±15.81pp</strong> means that on average, the model's predicted gain was off by about 15.81 percentage points from the actual gain.<br>
+    • <strong>Within ±10pp: 45.2%</strong> means nearly half the predictions were within 10 percentage points of the actual value — pretty close!
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <!-- PER-YEAR -->
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <div class="st"><div class="icon">📅</div> Per-Year Breakdown</div>
+
+  <div class="explain-box">
+    IPO market conditions change every year. Some years are "hot" (many IPOs listing with big gains) and some are "cold" (most IPOs listing flat or negative). This section shows how the model performed in each year separately. If accuracy drops in a newer year, it might mean the market has changed in ways the model hasn't learned yet.
+  </div>
+
+  <div class="grid3">
+    
+    <div class="mini">
+      <h5>2024 — 82 IPOs</h5>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+        <div><div style="font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;">Tier Acc</div>
+          <div class="val" style="font-size:1.2rem;color:#22c55e">75.6%</div></div>
+        <div><div style="font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;">Dir Acc</div>
+          <div class="val" style="font-size:1.2rem;color:#22c55e">82.9%</div></div>
+        <div><div style="font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;">Avg Gain Err</div>
+          <div class="val" style="font-size:1.2rem">±19.99pp</div></div>
+      </div>
+      <div class="mini-bar"><div class="mini-fill" style="width:75.6%;background:linear-gradient(90deg,var(--accent),var(--green));"></div></div>
+    </div>
+    <div class="mini">
+      <h5>2025 — 105 IPOs</h5>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+        <div><div style="font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;">Tier Acc</div>
+          <div class="val" style="font-size:1.2rem;color:#eab308">61.9%</div></div>
+        <div><div style="font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;">Dir Acc</div>
+          <div class="val" style="font-size:1.2rem;color:#22c55e">75.2%</div></div>
+        <div><div style="font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;">Avg Gain Err</div>
+          <div class="val" style="font-size:1.2rem">±13.21pp</div></div>
+      </div>
+      <div class="mini-bar"><div class="mini-fill" style="width:61.9%;background:linear-gradient(90deg,var(--accent),var(--green));"></div></div>
+    </div>
+    <div class="mini">
+      <h5>2026 — 23 IPOs</h5>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+        <div><div style="font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;">Tier Acc</div>
+          <div class="val" style="font-size:1.2rem;color:#22c55e">73.9%</div></div>
+        <div><div style="font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;">Dir Acc</div>
+          <div class="val" style="font-size:1.2rem;color:#eab308">60.9%</div></div>
+        <div><div style="font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;">Avg Gain Err</div>
+          <div class="val" style="font-size:1.2rem">±12.74pp</div></div>
+      </div>
+      <div class="mini-bar"><div class="mini-fill" style="width:73.9%;background:linear-gradient(90deg,var(--accent),var(--green));"></div></div>
+    </div>
+  </div>
+
+  <div class="explain-box">
+    <strong>What this tells us:</strong>
+    <ul>
+      <li><strong>2024 was the best year</strong> — 82.9% direction accuracy. The model's training data (up to 2023) was closest to 2024 market conditions.</li>
+      <li><strong>2025 saw a dip</strong> — Tier accuracy dropped to 61.9%. The market may have shifted — perhaps new types of IPOs or different investor behavior.</li>
+      <li><strong>2026 has the fewest IPOs (23)</strong> — only half the year has passed. The low direction accuracy (52.2%) could be noise from the small sample size, or it could signal that 2026 market conditions are very different from 2010–2023.</li>
+    </ul>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <!-- PER-TIER -->
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <div class="st"><div class="icon">🎯</div> Per-Tier Accuracy</div>
+
+  <div class="explain-box">
+    Not all tiers are equally easy to predict. This section shows how well the model performs for each subscription tier separately. Some IPOs in our test set had <strong>Low</strong> subscription (< 2x), some had <strong>Medium</strong> (2x–10x), and some had <strong>High</strong> (> 10x).
+  </div>
+
+  <div class="grid3">
+    
+    <div class="mini">
+      <h5>Low Tier — 29 IPOs</h5>
+      <div class="val" style="font-size:1.2rem;color:#ef4444">31.0%</div>
+      <div class="sub">Avg gain error: ±7.39pp</div>
+      <div class="mini-bar"><div class="mini-fill" style="width:31.0%;background:#ef4444"></div></div>
+    </div>
+    <div class="mini">
+      <h5>Medium Tier — 51 IPOs</h5>
+      <div class="val" style="font-size:1.2rem;color:#eab308">45.1%</div>
+      <div class="sub">Avg gain error: ±7.6pp</div>
+      <div class="mini-bar"><div class="mini-fill" style="width:45.1%;background:#eab308"></div></div>
+    </div>
+    <div class="mini">
+      <h5>High Tier — 130 IPOs</h5>
+      <div class="val" style="font-size:1.2rem;color:#22c55e">86.2%</div>
+      <div class="sub">Avg gain error: ±20.9pp</div>
+      <div class="mini-bar"><div class="mini-fill" style="width:86.2%;background:#22c55e"></div></div>
+    </div>
+  </div>
+
+  <div class="explain-box">
+    <strong>Key finding:</strong> The model is <strong>great at detecting High-tier IPOs (86.2%)</strong> but <strong>struggles with Low (31%) and Medium (45%)</strong>. Why?
+    <ul>
+      <li>High-tier IPOs are the most common in our dataset (130 out of 210). The model has seen lots of examples.</li>
+      <li>Low-tier IPOs are rare (only 29). With fewer examples to learn from, the model can't distinguish them well.</li>
+      <li>The tier classifier only uses <strong>3 features</strong> (issue size, price, year) — it doesn't know the actual subscription numbers. So it's essentially guessing based on "what kind of IPO typically gets low subscription?"</li>
+    </ul>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <!-- GAIN ERROR DISTRIBUTION -->
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <div class="st"><div class="icon">📊</div> Gain Error Distribution</div>
+
+  <div class="explain-box">
+    This histogram shows how many IPOs fell within each error range. Think of it like a "report card" — the more bars on the left (green), the better. Bars on the right (red) mean the model was very far off.
+  </div>
+
+  <div class="card">
+    <h4>How far off was each prediction?</h4>
+    <p style="margin-bottom:16px;">Each bar shows how many IPOs had gain predictions within that error range. <span style="color:#22c55e;font-weight:600">Green = close</span>, <span style="color:#eab308;font-weight:600">Yellow = moderate</span>, <span style="color:#ef4444;font-weight:600">Red = far off</span>.</p>
+    
+    <div class="hist-row">
+      <span class="hist-label">±0–5pp</span>
+      <div class="hist-track"><div class="hist-fill" style="width:100.0%;background:#22c55e;"></div></div>
+      <span class="hist-val">54 <span class="hist-pct">(26%)</span></span>
+    </div>
+    <div class="hist-row">
+      <span class="hist-label">±5–10pp</span>
+      <div class="hist-track"><div class="hist-fill" style="width:75.92592592592592%;background:#22c55e;"></div></div>
+      <span class="hist-val">41 <span class="hist-pct">(20%)</span></span>
+    </div>
+    <div class="hist-row">
+      <span class="hist-label">±10–15pp</span>
+      <div class="hist-track"><div class="hist-fill" style="width:66.66666666666666%;background:#eab308;"></div></div>
+      <span class="hist-val">36 <span class="hist-pct">(17%)</span></span>
+    </div>
+    <div class="hist-row">
+      <span class="hist-label">±15–20pp</span>
+      <div class="hist-track"><div class="hist-fill" style="width:51.85185185185185%;background:#eab308;"></div></div>
+      <span class="hist-val">28 <span class="hist-pct">(13%)</span></span>
+    </div>
+    <div class="hist-row">
+      <span class="hist-label">±20–30pp</span>
+      <div class="hist-track"><div class="hist-fill" style="width:57.407407407407405%;background:#ef4444;"></div></div>
+      <span class="hist-val">31 <span class="hist-pct">(15%)</span></span>
+    </div>
+    <div class="hist-row">
+      <span class="hist-label">±30–50pp</span>
+      <div class="hist-track"><div class="hist-fill" style="width:18.51851851851852%;background:#ef4444;"></div></div>
+      <span class="hist-val">10 <span class="hist-pct">(5%)</span></span>
+    </div>
+    <div class="hist-row">
+      <span class="hist-label">±50–100pp</span>
+      <div class="hist-track"><div class="hist-fill" style="width:14.814814814814813%;background:#ef4444;"></div></div>
+      <span class="hist-val">8 <span class="hist-pct">(4%)</span></span>
+    </div>
+    <div class="hist-row">
+      <span class="hist-label">±100–200pp</span>
+      <div class="hist-track"><div class="hist-fill" style="width:3.7037037037037033%;background:#ef4444;"></div></div>
+      <span class="hist-val">2 <span class="hist-pct">(1%)</span></span>
+    </div>
+    <p style="margin-top:12px;font-size:.75rem;color:var(--dim);">
+      <strong style="color:var(--green);">45.2%</strong> of predictions were within ±10pp &nbsp;|&nbsp;
+      <strong style="color:var(--yellow);">75.7%</strong> within ±20pp &nbsp;|&nbsp;
+      Median error: <strong style="color:var(--text2);">±10.77pp</strong>
+    </p>
+  </div>
+
+  <div class="explain-box">
+    <strong>Reading this chart:</strong> The first bar (±0–5pp) shows IPOs where the prediction was <em>very</em> close to reality — off by at most 5 percentage points. That's 54 IPOs (26%). The wider bars on the right show predictions that were way off — the worst was 136.33pp off.
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <!-- BEST & WORST -->
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <div class="st"><div class="icon">🏆</div> Best & Worst Predictions</div>
+
+  <div class="explain-box">
+    These tables show the 10 IPOs where the model was <strong>most accurate</strong> (smallest error) and <strong>least accurate</strong> (largest error). Looking at these helps us understand <em>when</em> the model works well and <em>when</em> it fails.
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h4>🏆 Top 10 Most Accurate</h4>
+      <p style="margin-bottom:12px;">The model nailed these — predictions were almost exactly right.</p>
+      <div class="table-wrap" style="border:none;">
+        <table>
+          <tr><th>IPO</th><th>Actual</th><th>Predicted</th><th>Error</th><th>Tier?</th></tr>
+          <tr><td class="td-name">Northern ARC Capital Limited</td>
+        <td class="td-num" style="color:#22c55e">+33.5%</td>
+        <td class="td-num" style="color:#22c55e">+33.6%</td>
+        <td class="td-num" style="color:#22c55e;font-weight:700">0.1</td>
+        <td class="td-center">✅</td></tr><tr><td class="td-name">Hyundai Motor India Limited</td>
+        <td class="td-num" style="color:#ef4444">-1.5%</td>
+        <td class="td-num" style="color:#ef4444">-1.4%</td>
+        <td class="td-num" style="color:#22c55e;font-weight:700">0.1</td>
+        <td class="td-center">✅</td></tr><tr><td class="td-name">Platinum Industries Ltd </td>
+        <td class="td-num" style="color:#22c55e">+33.3%</td>
+        <td class="td-num" style="color:#22c55e">+33.1%</td>
+        <td class="td-num" style="color:#22c55e;font-weight:700">0.2</td>
+        <td class="td-center">✅</td></tr><tr><td class="td-name">Ivalue Infosolutio...</td>
+        <td class="td-num" style="color:#ef4444">-4.7%</td>
+        <td class="td-num" style="color:#ef4444">-5.0%</td>
+        <td class="td-num" style="color:#22c55e;font-weight:700">0.3</td>
+        <td class="td-center">❌</td></tr><tr><td class="td-name">Regaal Resources L...</td>
+        <td class="td-num" style="color:#22c55e">+39.0%</td>
+        <td class="td-num" style="color:#22c55e">+39.6%</td>
+        <td class="td-num" style="color:#22c55e;font-weight:700">0.6</td>
+        <td class="td-center">✅</td></tr><tr><td class="td-name">Bluestone Jeweller...</td>
+        <td class="td-num" style="color:#ef4444">-1.6%</td>
+        <td class="td-num" style="color:#ef4444">-0.9%</td>
+        <td class="td-num" style="color:#22c55e;font-weight:700">0.7</td>
+        <td class="td-center">✅</td></tr><tr><td class="td-name">Canara HSBC Life I...</td>
+        <td class="td-num" style="color:#22c55e">+0.0%</td>
+        <td class="td-num" style="color:#ef4444">-0.8%</td>
+        <td class="td-num" style="color:#22c55e;font-weight:700">0.8</td>
+        <td class="td-center">✅</td></tr><tr><td class="td-name">Fujiyama Power Sys...</td>
+        <td class="td-num" style="color:#ef4444">-4.2%</td>
+        <td class="td-num" style="color:#ef4444">-3.4%</td>
+        <td class="td-num" style="color:#22c55e;font-weight:700">0.8</td>
+        <td class="td-center">❌</td></tr><tr><td class="td-name">Krystal Integrated Services Ltd </td>
+        <td class="td-num" style="color:#22c55e">+11.2%</td>
+        <td class="td-num" style="color:#22c55e">+12.0%</td>
+        <td class="td-num" style="color:#22c55e;font-weight:700">0.8</td>
+        <td class="td-center">✅</td></tr><tr><td class="td-name">ICICI Prudential A...</td>
+        <td class="td-num" style="color:#22c55e">+20.4%</td>
+        <td class="td-num" style="color:#22c55e">+21.2%</td>
+        <td class="td-num" style="color:#22c55e;font-weight:700">0.9</td>
+        <td class="td-center">✅</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h4>⚠️ Top 10 Least Accurate</h4>
+      <p style="margin-bottom:12px;">The model struggled with these — predictions were far from reality.</p>
+      <div class="table-wrap" style="border:none;">
+        <table>
+          <tr><th>IPO</th><th>Actual</th><th>Predicted</th><th>Error</th><th>Tier?</th></tr>
+          <tr><td class="td-name">Vibhor Steel Tubes Limited</td>
+        <td class="td-num" style="color:#22c55e">+178.8%</td>
+        <td class="td-num" style="color:#22c55e">+42.5%</td>
+        <td class="td-num" style="color:#ef4444;font-weight:700">136.3</td>
+        <td class="td-center">✅</td></tr><tr><td class="td-name">Mamata Machinery Limited</td>
+        <td class="td-num" style="color:#22c55e">+146.9%</td>
+        <td class="td-num" style="color:#22c55e">+40.3%</td>
+        <td class="td-num" style="color:#ef4444;font-weight:700">106.6</td>
+        <td class="td-center">✅</td></tr><tr><td class="td-name">Premier Energies Limited</td>
+        <td class="td-num" style="color:#22c55e">+120.2%</td>
+        <td class="td-num" style="color:#22c55e">+29.9%</td>
+        <td class="td-num" style="color:#ef4444;font-weight:700">90.3</td>
+        <td class="td-center">✅</td></tr><tr><td class="td-name">BLS E-Services Limited</td>
+        <td class="td-num" style="color:#22c55e">+128.9%</td>
+        <td class="td-num" style="color:#22c55e">+40.5%</td>
+        <td class="td-num" style="color:#ef4444;font-weight:700">88.4</td>
+        <td class="td-center">✅</td></tr><tr><td class="td-name">Bajaj Housing Finance Limited</td>
+        <td class="td-num" style="color:#22c55e">+114.3%</td>
+        <td class="td-num" style="color:#22c55e">+31.5%</td>
+        <td class="td-num" style="color:#ef4444;font-weight:700">82.8</td>
+        <td class="td-center">❌</td></tr><tr><td class="td-name">KRN Heat Exchanger and Refrigeration Limited</td>
+        <td class="td-num" style="color:#22c55e">+113.6%</td>
+        <td class="td-num" style="color:#22c55e">+41.5%</td>
+        <td class="td-num" style="color:#ef4444;font-weight:700">72.2</td>
+        <td class="td-center">✅</td></tr><tr><td class="td-name">Unicommerce eSolutions Limited</td>
+        <td class="td-num" style="color:#22c55e">+113.0%</td>
+        <td class="td-num" style="color:#22c55e">+41.5%</td>
+        <td class="td-num" style="color:#ef4444;font-weight:700">71.4</td>
+        <td class="td-center">✅</td></tr><tr><td class="td-name">Shree Ram Twistex ...</td>
+        <td class="td-num" style="color:#ef4444">-32.7%</td>
+        <td class="td-num" style="color:#22c55e">+31.1%</td>
+        <td class="td-num" style="color:#ef4444;font-weight:700">63.8</td>
+        <td class="td-center">✅</td></tr><tr><td class="td-name">Bharat Coking Coal...</td>
+        <td class="td-num" style="color:#22c55e">+96.6%</td>
+        <td class="td-num" style="color:#22c55e">+41.0%</td>
+        <td class="td-num" style="color:#ef4444;font-weight:700">55.6</td>
+        <td class="td-center">✅</td></tr><tr><td class="td-name">Unimech Aerospace and Manufacturing Limited</td>
+        <td class="td-num" style="color:#22c55e">+89.9%</td>
+        <td class="td-num" style="color:#22c55e">+37.3%</td>
+        <td class="td-num" style="color:#ef4444;font-weight:700">52.7</td>
+        <td class="td-center">✅</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <!-- FULL TABLE -->
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <div class="st"><div class="icon">📋</div> Complete Test Set — All 210 IPOs</div>
+
+  <div class="explain-box">
+    Every single IPO in our test set, from oldest (Jan 2024) to newest (May 2026). Use the <strong>search box</strong> to find a specific IPO, or the <strong>filter buttons</strong> to show only certain tiers or results. You can scroll through all 210 IPOs.
+    <br><br>
+    <strong>Column guide:</strong>
+    <ul>
+      <li><strong>Issue ₹Cr</strong> — How much the company raised (in crores)</li>
+      <li><strong>Price ₹</strong> — The IPO offer price per share</li>
+      <li><strong>Actual Gain</strong> — What really happened on listing day (+ = up, - = down)</li>
+      <li><strong>Pred Gain</strong> — What our model predicted</li>
+      <li><strong>Error</strong> — How far off the prediction was (lower = better)</li>
+      <li><strong>Actual Tier / Pred Tier</strong> — The real vs predicted subscription tier</li>
+      <li><strong>Tier?</strong> — ✅ = model got the tier right, ❌ = wrong</li>
+      <li><strong>Dir?</strong> — 📈 = model got the up/down direction right, 📉 = wrong</li>
+    </ul>
+  </div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;">
+    <input type="text" class="search-box" id="searchBox" placeholder="🔍  Search IPO name..." oninput="filterTable()">
+    <div class="filter-bar" id="filterBar">
+      <button class="filter-btn active" onclick="filterTier('all',this)">All (210)</button>
+      <button class="filter-btn" onclick="filterTier('Low',this)">🔴 Low (29)</button>
+      <button class="filter-btn" onclick="filterTier('Medium',this)">🟡 Medium (51)</button>
+      <button class="filter-btn" onclick="filterTier('High',this)">🟢 High (130)</button>
+      <button class="filter-btn" onclick="filterTier('match',this)">✅ Matched</button>
+      <button class="filter-btn" onclick="filterTier('miss',this)">❌ Missed</button>
+    </div>
+  </div>
+
+  <div class="table-wrap" style="max-height:600px;overflow-y:auto;">
+    <table id="ipoTable">
+      <thead>
+        <tr>
+          <th>IPO Name</th><th>Date</th><th>Issue ₹Cr</th><th>Price ₹</th>
+          <th>Actual Gain</th><th>Pred Gain</th><th>Error</th>
+          <th>Actual Tier</th><th>Pred Tier</th><th>Tier?</th><th>Dir?</th>
+        </tr>
+      </thead>
+      <tbody id="ipoBody">
+        
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Jyoti CNC Automation Limited</td>
+      <td class="td-date">2024-01-16</td>
+      <td class="td-num">1,000</td>
+      <td class="td-num">₹331</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+12.39%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+24.31%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">11.9</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Medi Assist Healthcare Services Limited</td>
+      <td class="td-date">2024-01-23</td>
+      <td class="td-num">1,172</td>
+      <td class="td-num">₹418</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+11.24%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+13.21%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">2.0</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Epack Durable Limited</td>
+      <td class="td-date">2024-01-30</td>
+      <td class="td-num">640</td>
+      <td class="td-num">₹230</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-2.17%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+14.06%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">16.2</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Nova Agritech Limited</td>
+      <td class="td-date">2024-01-31</td>
+      <td class="td-num">144</td>
+      <td class="td-num">₹41</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+36.59%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+38.22%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">1.6</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">BLS E-Services Limited</td>
+      <td class="td-date">2024-02-06</td>
+      <td class="td-num">309</td>
+      <td class="td-num">₹135</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+128.89%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+40.51%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">88.4</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Apeejay Surrendra Group (conglomerate)</td>
+      <td class="td-date">2024-02-12</td>
+      <td class="td-num">920</td>
+      <td class="td-num">₹155</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+20.65%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+30.25%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">9.6</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Capital Small Finance Bank Limited</td>
+      <td class="td-date">2024-02-14</td>
+      <td class="td-num">523</td>
+      <td class="td-num">₹468</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-7.05%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-0.12%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">6.9</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Jana Small Finance Bank Limited</td>
+      <td class="td-date">2024-02-14</td>
+      <td class="td-num">570</td>
+      <td class="td-num">₹414</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-4.35%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+13.79%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">18.1</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Rashi Peripherals Limited</td>
+      <td class="td-date">2024-02-14</td>
+      <td class="td-num">600</td>
+      <td class="td-num">₹311</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+7.72%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+26.92%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">19.2</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">Entero Healthcare Solutions Limited</td>
+      <td class="td-date">2024-02-16</td>
+      <td class="td-num">1,600</td>
+      <td class="td-num">₹240</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-1.03%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-3.88%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">2.9</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Vibhor Steel Tubes Limited</td>
+      <td class="td-date">2024-02-20</td>
+      <td class="td-num">72</td>
+      <td class="td-num">₹151</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+178.81%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+42.48%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">136.3</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">Juniper Hotels Ltd </td>
+      <td class="td-date">2024-02-28</td>
+      <td class="td-num">1,800</td>
+      <td class="td-num">₹360</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.33%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-6.72%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">7.0</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">GPT Healthcare Ltd </td>
+      <td class="td-date">2024-02-29</td>
+      <td class="td-num">525</td>
+      <td class="td-num">₹186</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+16.21%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+7.69%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">8.5</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Platinum Industries Ltd </td>
+      <td class="td-date">2024-03-05</td>
+      <td class="td-num">235</td>
+      <td class="td-num">₹171</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+33.33%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+33.15%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">0.2</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Exicom Tele-Systems Ltd </td>
+      <td class="td-date">2024-03-05</td>
+      <td class="td-num">429</td>
+      <td class="td-num">₹142</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+85.92%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+38.32%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">47.6</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Mukka Proteins Ltd </td>
+      <td class="td-date">2024-03-07</td>
+      <td class="td-num">224</td>
+      <td class="td-num">₹28</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+57.14%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+39.78%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">17.4</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">Indus Infra Trust </td>
+      <td class="td-date">2024-03-12</td>
+      <td class="td-num">2,500</td>
+      <td class="td-num">₹100</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+1.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+12.64%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">11.6</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">R K Swamy Ltd </td>
+      <td class="td-date">2024-03-12</td>
+      <td class="td-num">424</td>
+      <td class="td-num">₹288</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-12.50%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+20.15%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">32.6</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">J.G.Chemicals Ltd </td>
+      <td class="td-date">2024-03-13</td>
+      <td class="td-num">251</td>
+      <td class="td-num">₹221</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-4.52%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+19.86%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">24.4</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Gopal Snacks Ltd</td>
+      <td class="td-date">2024-03-14</td>
+      <td class="td-num">650</td>
+      <td class="td-num">₹401</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-12.72%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+7.25%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">20.0</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">Popular Vehicles & Services Ltd </td>
+      <td class="td-date">2024-03-19</td>
+      <td class="td-num">602</td>
+      <td class="td-num">₹295</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-1.02%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-7.05%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">6.0</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Krystal Integrated Services Ltd </td>
+      <td class="td-date">2024-03-21</td>
+      <td class="td-num">300</td>
+      <td class="td-num">₹715</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+11.19%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+12.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">0.8</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">SRM Contractors Ltd </td>
+      <td class="td-date">2024-04-03</td>
+      <td class="td-num">130</td>
+      <td class="td-num">₹210</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+7.14%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+32.81%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">25.7</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="miss">
+      <td class="td-name">Bharti Hexacom Ltd </td>
+      <td class="td-date">2024-04-12</td>
+      <td class="td-num">4,275</td>
+      <td class="td-num">₹570</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+32.49%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+23.35%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">9.1</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">Vodafone Idea Ltd </td>
+      <td class="td-date">2024-04-25</td>
+      <td class="td-num">13,825</td>
+      <td class="td-num">₹11</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+9.09%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+11.83%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">2.7</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Stanley Lifestyles Limited</td>
+      <td class="td-date">2024-06-28</td>
+      <td class="td-num">537</td>
+      <td class="td-num">₹369</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+35.23%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+7.59%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">27.6</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Allied Blenders and Distillers Limited</td>
+      <td class="td-date">2024-07-02</td>
+      <td class="td-num">1,500</td>
+      <td class="td-num">₹281</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+13.20%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+17.60%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">4.4</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Vraj Iron & Steel Limited</td>
+      <td class="td-date">2024-07-03</td>
+      <td class="td-num">171</td>
+      <td class="td-num">₹207</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+15.94%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+34.67%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">18.7</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Emcure Pharmaceuticals Limited</td>
+      <td class="td-date">2024-07-10</td>
+      <td class="td-num">1,952</td>
+      <td class="td-num">₹240</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+31.45%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+29.77%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">1.7</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Bansal Wire Industries Limited</td>
+      <td class="td-date">2024-07-10</td>
+      <td class="td-num">745</td>
+      <td class="td-num">₹256</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+37.52%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+27.46%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">10.1</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Sanstar Limited</td>
+      <td class="td-date">2024-07-26</td>
+      <td class="td-num">511</td>
+      <td class="td-num">₹95</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+12.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+32.32%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">20.3</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Akums Drugs and Pharmaceuticals Limited</td>
+      <td class="td-date">2024-08-06</td>
+      <td class="td-num">1,857</td>
+      <td class="td-num">₹679</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+6.77%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+29.08%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">22.3</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Ceigall India Limited</td>
+      <td class="td-date">2024-08-08</td>
+      <td class="td-num">1,253</td>
+      <td class="td-num">₹401</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+2.99%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+11.47%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">8.5</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">Ola Electric Mobility Limited</td>
+      <td class="td-date">2024-08-09</td>
+      <td class="td-num">6,146</td>
+      <td class="td-num">₹76</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-0.01%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+6.41%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">6.4</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Unicommerce eSolutions Limited</td>
+      <td class="td-date">2024-08-13</td>
+      <td class="td-num">277</td>
+      <td class="td-num">₹108</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+112.96%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+41.54%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">71.4</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Brainbees Solutions Limited</td>
+      <td class="td-date">2024-08-13</td>
+      <td class="td-num">4,194</td>
+      <td class="td-num">₹465</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+34.41%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+13.88%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">20.5</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Saraswati Saree Depot Limited</td>
+      <td class="td-date">2024-08-20</td>
+      <td class="td-num">160</td>
+      <td class="td-num">₹160</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+25.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+35.59%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">10.6</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Interarch Building Products Limited</td>
+      <td class="td-date">2024-08-26</td>
+      <td class="td-num">600</td>
+      <td class="td-num">₹900</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+43.47%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+29.50%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">14.0</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Orient Technologies Limited</td>
+      <td class="td-date">2024-08-28</td>
+      <td class="td-num">215</td>
+      <td class="td-num">₹206</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+40.78%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+37.52%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">3.3</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Premier Energies Limited</td>
+      <td class="td-date">2024-09-03</td>
+      <td class="td-num">2,830</td>
+      <td class="td-num">₹450</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+120.22%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+29.91%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">90.3</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Ecos (India) Mobility & Hospitality Limited</td>
+      <td class="td-date">2024-09-04</td>
+      <td class="td-num">601</td>
+      <td class="td-num">₹334</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+17.16%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+27.50%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">10.3</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Baazar Style Retail Limited</td>
+      <td class="td-date">2024-09-06</td>
+      <td class="td-num">835</td>
+      <td class="td-num">₹389</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+22.44%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">22.4</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Gala Precision Engineering Limited</td>
+      <td class="td-date">2024-09-09</td>
+      <td class="td-num">168</td>
+      <td class="td-num">₹529</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+41.78%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+38.96%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">2.8</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Shree Tirupati Balajee Agro Trading Company Limited</td>
+      <td class="td-date">2024-09-12</td>
+      <td class="td-num">170</td>
+      <td class="td-num">₹83</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+11.93%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+37.15%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">25.2</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Kross Limited</td>
+      <td class="td-date">2024-09-16</td>
+      <td class="td-num">500</td>
+      <td class="td-num">₹240</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+14.68%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">14.7</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="miss">
+      <td class="td-name">Bajaj Housing Finance Limited</td>
+      <td class="td-date">2024-09-16</td>
+      <td class="td-num">6,560</td>
+      <td class="td-num">₹70</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+114.29%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+31.50%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">82.8</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Tolins Tyres Limited</td>
+      <td class="td-date">2024-09-16</td>
+      <td class="td-num">230</td>
+      <td class="td-num">₹226</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.44%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+18.97%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">18.5</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">P N Gadgil Jewellers Limited</td>
+      <td class="td-date">2024-09-17</td>
+      <td class="td-num">1,100</td>
+      <td class="td-num">₹480</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+73.75%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+26.41%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">47.3</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Western Carriers Limited</td>
+      <td class="td-date">2024-09-24</td>
+      <td class="td-num">493</td>
+      <td class="td-num">₹172</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-1.16%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+22.48%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">23.6</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Northern ARC Capital Limited</td>
+      <td class="td-date">2024-09-24</td>
+      <td class="td-num">777</td>
+      <td class="td-num">₹263</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+33.46%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+33.57%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">0.1</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Arkade Developers Limited</td>
+      <td class="td-date">2024-09-24</td>
+      <td class="td-num">410</td>
+      <td class="td-num">₹128</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+37.42%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+34.66%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">2.8</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Manba Finance Limited</td>
+      <td class="td-date">2024-09-30</td>
+      <td class="td-num">151</td>
+      <td class="td-num">₹120</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+25.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+44.23%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">19.2</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">KRN Heat Exchanger and Refrigeration Limited</td>
+      <td class="td-date">2024-10-03</td>
+      <td class="td-num">342</td>
+      <td class="td-num">₹220</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+113.64%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+41.49%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">72.2</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Diffusion Engineers Limited</td>
+      <td class="td-date">2024-10-04</td>
+      <td class="td-num">158</td>
+      <td class="td-num">₹168</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+11.90%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+35.96%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">24.1</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Garuda Construction and Engineering Limited</td>
+      <td class="td-date">2024-10-15</td>
+      <td class="td-num">264</td>
+      <td class="td-num">₹95</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+8.63%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+13.78%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">5.2</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">Hyundai Motor India Limited</td>
+      <td class="td-date">2024-10-22</td>
+      <td class="td-num">13,825</td>
+      <td class="td-num">₹240</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-1.48%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-1.35%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">0.1</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Deepak Builders & Engineers India Limited</td>
+      <td class="td-date">2024-10-28</td>
+      <td class="td-num">260</td>
+      <td class="td-num">₹203</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-2.22%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+27.92%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">30.1</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="miss">
+      <td class="td-name">Waaree Energies Limited</td>
+      <td class="td-date">2024-10-28</td>
+      <td class="td-num">4,321</td>
+      <td class="td-num">₹240</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+69.66%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+31.13%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">38.5</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">Godavari Biorefineries Limited</td>
+      <td class="td-date">2024-10-30</td>
+      <td class="td-num">555</td>
+      <td class="td-num">₹352</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-11.78%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-4.65%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">7.1</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">Afcons Infrastructure Limited</td>
+      <td class="td-date">2024-11-04</td>
+      <td class="td-num">5,430</td>
+      <td class="td-num">₹463</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-7.12%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-2.68%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">4.4</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">Sagility India Limited</td>
+      <td class="td-date">2024-11-12</td>
+      <td class="td-num">2,106</td>
+      <td class="td-num">₹30</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+3.53%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+5.08%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">1.6</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">ACME Solar Holdings Limited</td>
+      <td class="td-date">2024-11-13</td>
+      <td class="td-num">2,900</td>
+      <td class="td-num">₹289</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-10.38%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.26%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">10.6</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Swiggy Limited</td>
+      <td class="td-date">2024-11-13</td>
+      <td class="td-num">11,327</td>
+      <td class="td-num">₹390</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+5.64%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+3.46%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">2.2</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">Niva Bupa Health Insurance Company Limited</td>
+      <td class="td-date">2024-11-14</td>
+      <td class="td-num">2,200</td>
+      <td class="td-num">₹74</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+6.08%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-0.66%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">6.7</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">Zinka Logistics Solution Limited (BlackBuck)</td>
+      <td class="td-date">2024-11-22</td>
+      <td class="td-num">1,115</td>
+      <td class="td-num">₹273</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+2.22%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-2.81%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">5.0</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">NTPC Green Energy Limited</td>
+      <td class="td-date">2024-11-27</td>
+      <td class="td-num">10,000</td>
+      <td class="td-num">₹108</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+3.33%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+1.30%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">2.0</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Enviro Infra Engineers Limited</td>
+      <td class="td-date">2024-11-29</td>
+      <td class="td-num">650</td>
+      <td class="td-num">₹148</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+47.30%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+32.50%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">14.8</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">Suraksha Diagnostic Limited</td>
+      <td class="td-date">2024-12-06</td>
+      <td class="td-num">846</td>
+      <td class="td-num">₹441</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-0.91%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-7.70%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">6.8</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">One Mobikwik Systems Limited</td>
+      <td class="td-date">2024-12-18</td>
+      <td class="td-num">572</td>
+      <td class="td-num">₹279</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+58.51%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+36.52%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">22.0</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="miss">
+      <td class="td-name">Vishal Mega Mart Limited</td>
+      <td class="td-date">2024-12-18</td>
+      <td class="td-num">8,000</td>
+      <td class="td-num">₹78</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+41.03%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+23.38%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">17.6</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="miss">
+      <td class="td-name">Sai Life Sciences Limited</td>
+      <td class="td-date">2024-12-18</td>
+      <td class="td-num">3,043</td>
+      <td class="td-num">₹549</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+20.22%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+9.18%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">11.0</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="miss">
+      <td class="td-name">Inventurus Knowledge Solutions Limited</td>
+      <td class="td-date">2024-12-19</td>
+      <td class="td-num">2,498</td>
+      <td class="td-num">₹240</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+39.65%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+29.73%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">9.9</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">International Gemmological Institute (India) Limited</td>
+      <td class="td-date">2024-12-20</td>
+      <td class="td-num">4,225</td>
+      <td class="td-num">₹417</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+21.07%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+23.63%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">2.6</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Concord Enviro Systems Limited</td>
+      <td class="td-date">2024-12-27</td>
+      <td class="td-num">500</td>
+      <td class="td-num">₹701</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+18.69%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+7.84%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">10.8</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Sanathan Textiles Limited</td>
+      <td class="td-date">2024-12-27</td>
+      <td class="td-num">550</td>
+      <td class="td-num">₹321</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+30.56%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+21.09%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">9.5</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Mamata Machinery Limited</td>
+      <td class="td-date">2024-12-27</td>
+      <td class="td-num">179</td>
+      <td class="td-num">₹243</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+146.91%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+40.27%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">106.6</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Dam Capital Advisors Limited</td>
+      <td class="td-date">2024-12-27</td>
+      <td class="td-num">840</td>
+      <td class="td-num">₹283</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+38.83%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+30.52%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">8.3</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Transrail Lighting Limited</td>
+      <td class="td-date">2024-12-27</td>
+      <td class="td-num">839</td>
+      <td class="td-num">₹432</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+35.45%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+29.47%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">6.0</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">Ventive Hospitality Limited</td>
+      <td class="td-date">2024-12-30</td>
+      <td class="td-num">1,600</td>
+      <td class="td-num">₹643</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+11.69%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+9.42%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">2.3</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Senores Pharmaceuticals Limited</td>
+      <td class="td-date">2024-12-30</td>
+      <td class="td-num">582</td>
+      <td class="td-num">₹391</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+51.84%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+33.15%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">18.7</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">Carraro India Limited</td>
+      <td class="td-date">2024-12-30</td>
+      <td class="td-num">1,250</td>
+      <td class="td-num">₹704</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-6.25%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-9.18%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">2.9</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Unimech Aerospace and Manufacturing Limited</td>
+      <td class="td-date">2024-12-31</td>
+      <td class="td-num">500</td>
+      <td class="td-num">₹785</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+89.94%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+37.28%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">52.7</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Indo Farm Equipment Limited</td>
+      <td class="td-date">2025-01-07</td>
+      <td class="td-num">260</td>
+      <td class="td-num">₹215</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+20.19%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+42.18%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">22.0</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Standard Glass Lining Technology Limited</td>
+      <td class="td-date">2025-01-13</td>
+      <td class="td-num">410</td>
+      <td class="td-num">₹140</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+25.71%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+40.85%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">15.1</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Quadrant Future Tek Limited</td>
+      <td class="td-date">2025-01-14</td>
+      <td class="td-num">290</td>
+      <td class="td-num">₹290</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+28.97%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+41.57%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">12.6</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">Capital Infra Trust</td>
+      <td class="td-date">2025-01-17</td>
+      <td class="td-num">1,578</td>
+      <td class="td-num">₹99</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+2.31%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">2.3</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Laxmi Dental Limited</td>
+      <td class="td-date">2025-01-20</td>
+      <td class="td-num">698</td>
+      <td class="td-num">₹428</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+23.36%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+35.25%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">11.9</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Stallion India Fluorochem Limited</td>
+      <td class="td-date">2025-01-23</td>
+      <td class="td-num">199</td>
+      <td class="td-num">₹90</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+33.33%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+42.03%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">8.7</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Denta Water & Infrastructure Limited</td>
+      <td class="td-date">2025-01-29</td>
+      <td class="td-num">220</td>
+      <td class="td-num">₹294</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+12.24%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+41.32%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">29.1</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">Dr Agarwal's Healthcare Limited</td>
+      <td class="td-date">2025-02-04</td>
+      <td class="td-num">3,027</td>
+      <td class="td-num">₹402</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-1.27%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-6.22%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">5.0</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Ajax Engineering Limited</td>
+      <td class="td-date">2025-02-17</td>
+      <td class="td-num">1,269</td>
+      <td class="td-num">₹629</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-5.72%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+3.42%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">9.1</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Hexaware Technologies Limited</td>
+      <td class="td-date">2025-02-19</td>
+      <td class="td-num">8,750</td>
+      <td class="td-num">₹708</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+3.25%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-2.12%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">5.4</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">Quality Power Electronics Limited</td>
+      <td class="td-date">2025-02-24</td>
+      <td class="td-num">859</td>
+      <td class="td-num">₹425</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+1.66%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-6.70%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">8.4</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">Ather Energy Limited</td>
+      <td class="td-date">2025-05-06</td>
+      <td class="td-num">2,981</td>
+      <td class="td-num">₹321</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+1.57%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-4.84%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">6.4</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Borana Weaves Limited</td>
+      <td class="td-date">2025-05-27</td>
+      <td class="td-num">145</td>
+      <td class="td-num">₹216</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+12.50%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+39.53%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">27.0</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="miss">
+      <td class="td-name">Belrise Industries Limited</td>
+      <td class="td-date">2025-05-28</td>
+      <td class="td-num">2,150</td>
+      <td class="td-num">₹90</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+9.44%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+26.10%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">16.7</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Schloss Bangalore Limited</td>
+      <td class="td-date">2025-06-02</td>
+      <td class="td-num">3,500</td>
+      <td class="td-num">₹435</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-6.55%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+4.53%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">11.1</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">Aegis Vopak Terminals Limited</td>
+      <td class="td-date">2025-06-02</td>
+      <td class="td-num">2,800</td>
+      <td class="td-num">₹235</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-6.38%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-1.40%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">5.0</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Prostarm Info Systems Limited</td>
+      <td class="td-date">2025-06-03</td>
+      <td class="td-num">168</td>
+      <td class="td-num">₹105</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+19.05%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+34.17%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">15.1</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Scoda Tubes Limited</td>
+      <td class="td-date">2025-06-04</td>
+      <td class="td-num">220</td>
+      <td class="td-num">₹140</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+27.09%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">27.1</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Oswal Pumps Limited</td>
+      <td class="td-date">2025-06-20</td>
+      <td class="td-num">1,387</td>
+      <td class="td-num">₹614</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+2.93%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+20.37%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">17.4</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Arisinfra Solutions Limited</td>
+      <td class="td-date">2025-06-25</td>
+      <td class="td-num">500</td>
+      <td class="td-num">₹222</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-5.81%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-0.14%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">5.7</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Ellenbarrie Industrial Gases Limited</td>
+      <td class="td-date">2025-07-01</td>
+      <td class="td-num">853</td>
+      <td class="td-num">₹400</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+23.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+16.73%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">6.3</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">Kalpataru Limited</td>
+      <td class="td-date">2025-07-01</td>
+      <td class="td-num">1,590</td>
+      <td class="td-num">₹414</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.02%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-2.58%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">2.6</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Globe Civil Projects Limited</td>
+      <td class="td-date">2025-07-01</td>
+      <td class="td-num">119</td>
+      <td class="td-num">₹71</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+28.31%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+33.42%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">5.1</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Sambhv Steel Tubes Limited</td>
+      <td class="td-date">2025-07-02</td>
+      <td class="td-num">540</td>
+      <td class="td-num">₹82</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+34.27%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+21.31%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">13.0</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">HDB Financial Services Limited</td>
+      <td class="td-date">2025-07-02</td>
+      <td class="td-num">12,500</td>
+      <td class="td-num">₹740</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+12.84%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+13.78%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">0.9</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Indogulf Cropsciences Limited</td>
+      <td class="td-date">2025-07-03</td>
+      <td class="td-num">200</td>
+      <td class="td-num">₹111</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+19.77%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">19.8</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Crizac Limited</td>
+      <td class="td-date">2025-07-09</td>
+      <td class="td-num">860</td>
+      <td class="td-num">₹245</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+14.29%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+27.42%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">13.1</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">Travel Food Services Limited</td>
+      <td class="td-date">2025-07-14</td>
+      <td class="td-num">2,000</td>
+      <td class="td-num">₹240</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+2.38%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-1.22%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">3.6</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Smartworks Coworking Limited</td>
+      <td class="td-date">2025-07-17</td>
+      <td class="td-num">583</td>
+      <td class="td-num">₹407</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+7.15%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+10.76%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">3.6</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="miss">
+      <td class="td-name">Anthem Biosciences Limited</td>
+      <td class="td-date">2025-07-21</td>
+      <td class="td-num">3,395</td>
+      <td class="td-num">₹570</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+26.86%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+28.14%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">1.3</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Indiqube Spaces Limited</td>
+      <td class="td-date">2025-07-30</td>
+      <td class="td-num">700</td>
+      <td class="td-num">₹237</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-7.72%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+13.37%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">21.1</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">GNG Electronics Limited</td>
+      <td class="td-date">2025-07-30</td>
+      <td class="td-num">460</td>
+      <td class="td-num">₹237</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+47.68%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+36.89%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">10.8</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Brigade Hotel Ventures Limited</td>
+      <td class="td-date">2025-07-31</td>
+      <td class="td-num">760</td>
+      <td class="td-num">₹90</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-8.89%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+5.70%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">14.6</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Shanti Gold International Ltd</td>
+      <td class="td-date">2025-08-01</td>
+      <td class="td-num">360</td>
+      <td class="td-num">₹199</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+15.13%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+30.88%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">15.8</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">Laxmi India Finance Ltd</td>
+      <td class="td-date">2025-08-05</td>
+      <td class="td-num">254</td>
+      <td class="td-num">₹158</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-13.92%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-2.50%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">11.4</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Aditya Infotech Ltd</td>
+      <td class="td-date">2025-08-05</td>
+      <td class="td-num">595</td>
+      <td class="td-num">₹675</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+50.81%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+33.24%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">17.6</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">M & B Engineering Ltd</td>
+      <td class="td-date">2025-08-06</td>
+      <td class="td-num">650</td>
+      <td class="td-num">₹385</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.26%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+23.18%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">22.9</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">National Securities Depository Ltd (NSDL)</td>
+      <td class="td-date">2025-08-06</td>
+      <td class="td-num">595</td>
+      <td class="td-num">₹800</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+10.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+21.42%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">11.4</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Sri Lotus Developers & Realty Ltd</td>
+      <td class="td-date">2025-08-06</td>
+      <td class="td-num">792</td>
+      <td class="td-num">₹150</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+19.40%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+30.03%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">10.6</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Highway Infrastruc...</td>
+      <td class="td-date">2025-08-12</td>
+      <td class="td-num">130</td>
+      <td class="td-num">₹70</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+67.14%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+43.50%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">23.6</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">All Time Plastics ...</td>
+      <td class="td-date">2025-08-14</td>
+      <td class="td-num">401</td>
+      <td class="td-num">₹275</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+14.29%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+7.53%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">6.8</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">JSW Cement Ltd</td>
+      <td class="td-date">2025-08-14</td>
+      <td class="td-num">3,600</td>
+      <td class="td-num">₹147</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+4.08%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+8.10%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">4.0</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="miss">
+      <td class="td-name">Knowledge Realty T...</td>
+      <td class="td-date">2025-08-18</td>
+      <td class="td-num">4,800</td>
+      <td class="td-num">₹100</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+4.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+16.94%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">12.9</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">Bluestone Jeweller...</td>
+      <td class="td-date">2025-08-19</td>
+      <td class="td-num">1,541</td>
+      <td class="td-num">₹517</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-1.59%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-0.94%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">0.7</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Regaal Resources L...</td>
+      <td class="td-date">2025-08-20</td>
+      <td class="td-num">306</td>
+      <td class="td-num">₹102</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+39.02%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+39.59%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">0.6</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="miss">
+      <td class="td-name">Vikram Solar Ltd</td>
+      <td class="td-date">2025-08-26</td>
+      <td class="td-num">2,079</td>
+      <td class="td-num">₹332</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+2.41%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+26.55%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">24.1</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Patel Retail Ltd</td>
+      <td class="td-date">2025-08-26</td>
+      <td class="td-num">243</td>
+      <td class="td-num">₹255</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+19.61%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+30.57%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">11.0</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Shreeji Shipping G...</td>
+      <td class="td-date">2025-08-26</td>
+      <td class="td-num">411</td>
+      <td class="td-num">₹252</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+7.88%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+26.76%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">18.9</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Gem Aromatics Ltd</td>
+      <td class="td-date">2025-08-26</td>
+      <td class="td-num">451</td>
+      <td class="td-num">₹325</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+19.39%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">19.4</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Mangal Electrical ...</td>
+      <td class="td-date">2025-08-28</td>
+      <td class="td-num">400</td>
+      <td class="td-num">₹561</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-0.53%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+7.50%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">8.0</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Vikran Engineering...</td>
+      <td class="td-date">2025-09-03</td>
+      <td class="td-num">772</td>
+      <td class="td-num">₹97</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+2.78%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+20.79%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">18.0</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Anlon Healthcare L...</td>
+      <td class="td-date">2025-09-03</td>
+      <td class="td-num">121</td>
+      <td class="td-num">₹91</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+11.48%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">11.5</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Amanta Healthcare ...</td>
+      <td class="td-date">2025-09-09</td>
+      <td class="td-num">126</td>
+      <td class="td-num">₹126</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+6.35%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+34.65%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">28.3</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="miss">
+      <td class="td-name">Urban Company Ltd</td>
+      <td class="td-date">2025-09-17</td>
+      <td class="td-num">1,900</td>
+      <td class="td-num">₹103</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+56.31%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+37.58%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">18.7</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Shringar House of ...</td>
+      <td class="td-date">2025-09-17</td>
+      <td class="td-num">401</td>
+      <td class="td-num">₹165</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+13.76%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+28.02%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">14.3</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Dev Accelerator Lt...</td>
+      <td class="td-date">2025-09-17</td>
+      <td class="td-num">143</td>
+      <td class="td-num">₹61</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.49%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+34.54%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">34.0</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">Euro Pratik Sales ...</td>
+      <td class="td-date">2025-09-23</td>
+      <td class="td-num">451</td>
+      <td class="td-num">₹247</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+10.71%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-5.88%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">16.6</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">VMS TMT Ltd</td>
+      <td class="td-date">2025-09-24</td>
+      <td class="td-num">148</td>
+      <td class="td-num">₹99</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+6.06%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+34.36%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">28.3</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">Ivalue Infosolutio...</td>
+      <td class="td-date">2025-09-25</td>
+      <td class="td-num">560</td>
+      <td class="td-num">₹299</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-4.68%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-5.01%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">0.3</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Saatvik Green Ener...</td>
+      <td class="td-date">2025-09-26</td>
+      <td class="td-num">900</td>
+      <td class="td-num">₹465</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-1.08%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+4.09%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">5.2</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">GK Energy Ltd</td>
+      <td class="td-date">2025-09-26</td>
+      <td class="td-num">464</td>
+      <td class="td-num">₹153</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+7.84%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+32.18%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">24.3</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Ganesh Consumer Pr...</td>
+      <td class="td-date">2025-09-29</td>
+      <td class="td-num">409</td>
+      <td class="td-num">₹322</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-8.39%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-3.21%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">5.2</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Atlanta Electrical...</td>
+      <td class="td-date">2025-09-29</td>
+      <td class="td-num">688</td>
+      <td class="td-num">₹754</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+13.81%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+27.44%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">13.6</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Anand Rathi Share ...</td>
+      <td class="td-date">2025-09-30</td>
+      <td class="td-num">745</td>
+      <td class="td-num">₹414</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+4.37%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+15.12%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">10.8</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Jaro Institute of ...</td>
+      <td class="td-date">2025-09-30</td>
+      <td class="td-num">450</td>
+      <td class="td-num">₹890</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+14.53%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">14.5</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Solarworld Energy ...</td>
+      <td class="td-date">2025-09-30</td>
+      <td class="td-num">490</td>
+      <td class="td-num">₹351</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+10.83%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+29.41%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">18.6</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Seshaasai Technolo...</td>
+      <td class="td-date">2025-09-30</td>
+      <td class="td-num">813</td>
+      <td class="td-num">₹423</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+3.07%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+28.29%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">25.2</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">BMW Ventures Ltd</td>
+      <td class="td-date">2025-10-01</td>
+      <td class="td-num">232</td>
+      <td class="td-num">₹99</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-19.19%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-6.53%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">12.7</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">EPack Prefab Techn...</td>
+      <td class="td-date">2025-10-01</td>
+      <td class="td-num">504</td>
+      <td class="td-num">₹204</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-8.77%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-1.03%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">7.7</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Jain Resource Recy...</td>
+      <td class="td-date">2025-10-01</td>
+      <td class="td-num">1,250</td>
+      <td class="td-num">₹232</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+14.33%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+17.34%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">3.0</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">TruAlt Bioenergy L...</td>
+      <td class="td-date">2025-10-03</td>
+      <td class="td-num">839</td>
+      <td class="td-num">₹496</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+10.89%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+28.11%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">17.2</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Jinkushal Industri...</td>
+      <td class="td-date">2025-10-03</td>
+      <td class="td-num">116</td>
+      <td class="td-num">₹121</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+3.31%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+31.49%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">28.2</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">Pace Digitek Ltd</td>
+      <td class="td-date">2025-10-06</td>
+      <td class="td-num">819</td>
+      <td class="td-num">₹219</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+3.58%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-5.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">8.6</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Glottis Ltd</td>
+      <td class="td-date">2025-10-07</td>
+      <td class="td-num">307</td>
+      <td class="td-num">₹129</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-31.78%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-2.26%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">29.5</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Fabtech Technologi...</td>
+      <td class="td-date">2025-10-07</td>
+      <td class="td-num">230</td>
+      <td class="td-num">₹191</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.00%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-3.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">3.0</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Advance Agrolife L...</td>
+      <td class="td-date">2025-10-08</td>
+      <td class="td-num">193</td>
+      <td class="td-num">₹100</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+13.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+30.90%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">17.9</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Om Freight Forward...</td>
+      <td class="td-date">2025-10-08</td>
+      <td class="td-num">122</td>
+      <td class="td-num">₹135</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-38.89%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+1.43%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">40.3</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">Tata Capital Ltd</td>
+      <td class="td-date">2025-10-13</td>
+      <td class="td-num">13,825</td>
+      <td class="td-num">₹326</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+1.23%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-3.53%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">4.8</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">LG Electronics Ind...</td>
+      <td class="td-date">2025-10-14</td>
+      <td class="td-num">11,607</td>
+      <td class="td-num">₹1,140</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+50.44%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+26.54%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">23.9</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Rubicon Research L...</td>
+      <td class="td-date">2025-10-16</td>
+      <td class="td-num">1,378</td>
+      <td class="td-num">₹485</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+27.86%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+34.53%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">6.7</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Canara Robeco Asse...</td>
+      <td class="td-date">2025-10-16</td>
+      <td class="td-num">1,326</td>
+      <td class="td-num">₹266</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+5.36%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+9.26%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">3.9</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Anantam Highways T...</td>
+      <td class="td-date">2025-10-16</td>
+      <td class="td-num">400</td>
+      <td class="td-num">₹100</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+3.02%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+7.51%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">4.5</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">Canara HSBC Life I...</td>
+      <td class="td-date">2025-10-17</td>
+      <td class="td-num">2,518</td>
+      <td class="td-num">₹106</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.00%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-0.76%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">0.8</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Midwest Ltd</td>
+      <td class="td-date">2025-10-24</td>
+      <td class="td-num">451</td>
+      <td class="td-num">₹1,065</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+9.40%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+28.69%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">19.3</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Orkla India Ltd</td>
+      <td class="td-date">2025-11-06</td>
+      <td class="td-num">1,668</td>
+      <td class="td-num">₹730</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+2.95%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+23.74%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">20.8</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Studds Accessories...</td>
+      <td class="td-date">2025-11-07</td>
+      <td class="td-num">455</td>
+      <td class="td-num">₹585</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-2.56%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+27.79%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">30.4</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="miss">
+      <td class="td-name">Lenskart Solutions...</td>
+      <td class="td-date">2025-11-10</td>
+      <td class="td-num">7,278</td>
+      <td class="td-num">₹402</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-2.99%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+22.30%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">25.3</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="miss">
+      <td class="td-name">Billionbrains Gara...</td>
+      <td class="td-date">2025-11-12</td>
+      <td class="td-num">6,632</td>
+      <td class="td-num">₹100</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+14.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+19.37%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">5.4</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">Pine Labs Ltd</td>
+      <td class="td-date">2025-11-14</td>
+      <td class="td-num">3,900</td>
+      <td class="td-num">₹221</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+9.50%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.48%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">9.0</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">Physicswallah Ltd</td>
+      <td class="td-date">2025-11-18</td>
+      <td class="td-num">3,480</td>
+      <td class="td-num">₹109</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+31.28%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-1.03%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">32.3</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">Emmvee Photovoltai...</td>
+      <td class="td-date">2025-11-18</td>
+      <td class="td-num">2,900</td>
+      <td class="td-num">₹217</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.00%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-6.41%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">6.4</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="miss">
+      <td class="td-name">Tenneco Clean Air ...</td>
+      <td class="td-date">2025-11-19</td>
+      <td class="td-num">3,600</td>
+      <td class="td-num">₹397</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+25.44%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+27.90%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">2.5</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Fujiyama Power Sys...</td>
+      <td class="td-date">2025-11-20</td>
+      <td class="td-num">828</td>
+      <td class="td-num">₹228</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-4.21%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-3.43%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">0.8</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Capillary Technolo...</td>
+      <td class="td-date">2025-11-21</td>
+      <td class="td-num">878</td>
+      <td class="td-num">₹577</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-2.95%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+26.79%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">29.7</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Excelsoft Technolo...</td>
+      <td class="td-date">2025-11-26</td>
+      <td class="td-num">500</td>
+      <td class="td-num">₹120</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+12.50%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+25.79%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">13.3</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Sudeep Pharma Ltd</td>
+      <td class="td-date">2025-11-28</td>
+      <td class="td-num">895</td>
+      <td class="td-num">₹593</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+23.77%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+30.67%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">6.9</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Vidya Wires Ltd</td>
+      <td class="td-date">2025-12-10</td>
+      <td class="td-num">300</td>
+      <td class="td-num">₹52</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.25%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+27.37%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">27.1</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="miss">
+      <td class="td-name">Meesho Ltd</td>
+      <td class="td-date">2025-12-10</td>
+      <td class="td-num">5,421</td>
+      <td class="td-num">₹111</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+45.23%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+35.75%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">9.5</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Aequs Ltd</td>
+      <td class="td-date">2025-12-10</td>
+      <td class="td-num">922</td>
+      <td class="td-num">₹124</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+12.90%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+36.41%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">23.5</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Corona Remedies Lt...</td>
+      <td class="td-date">2025-12-15</td>
+      <td class="td-num">655</td>
+      <td class="td-num">₹1,062</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+36.72%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+33.64%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">3.1</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Park Medi World Lt...</td>
+      <td class="td-date">2025-12-17</td>
+      <td class="td-num">920</td>
+      <td class="td-num">₹162</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-3.95%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+8.09%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">12.0</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Nephrocare Health ...</td>
+      <td class="td-date">2025-12-17</td>
+      <td class="td-num">871</td>
+      <td class="td-num">₹460</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+6.89%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+11.05%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">4.2</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">ICICI Prudential A...</td>
+      <td class="td-date">2025-12-19</td>
+      <td class="td-num">10,603</td>
+      <td class="td-num">₹2,165</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+20.38%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+21.24%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">0.9</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="miss">
+      <td class="td-name">KSH International ...</td>
+      <td class="td-date">2025-12-23</td>
+      <td class="td-num">644</td>
+      <td class="td-num">₹384</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-3.65%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-9.16%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">5.5</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Gujarat Kidney & S...</td>
+      <td class="td-date">2025-12-30</td>
+      <td class="td-num">251</td>
+      <td class="td-num">₹114</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+5.92%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+8.61%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">2.7</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Bharat Coking Coal...</td>
+      <td class="td-date">2026-01-19</td>
+      <td class="td-num">1,071</td>
+      <td class="td-num">₹23</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+96.57%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+40.97%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">55.6</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="miss">
+      <td class="td-name">Amagi Media Labs L...</td>
+      <td class="td-date">2026-01-21</td>
+      <td class="td-num">1,789</td>
+      <td class="td-num">₹361</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-12.19%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+22.04%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">34.2</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">Shadowfax Technolo...</td>
+      <td class="td-date">2026-01-28</td>
+      <td class="td-num">1,907</td>
+      <td class="td-num">₹124</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-8.87%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+1.51%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">10.4</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">Fractal Analytics ...</td>
+      <td class="td-date">2026-02-16</td>
+      <td class="td-num">2,834</td>
+      <td class="td-num">₹900</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.00%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-2.20%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">2.2</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="match">
+      <td class="td-name">Aye Finance Ltd</td>
+      <td class="td-date">2026-02-16</td>
+      <td class="td-num">1,010</td>
+      <td class="td-num">₹129</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+0.00%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-5.90%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">5.9</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">Gaudium IVF and Wo...</td>
+      <td class="td-date">2026-02-27</td>
+      <td class="td-num">165</td>
+      <td class="td-num">₹79</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+5.06%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+12.13%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">7.1</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="match">
+      <td class="td-name">Shree Ram Twistex ...</td>
+      <td class="td-date">2026-03-02</td>
+      <td class="td-num">110</td>
+      <td class="td-num">₹104</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-32.69%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+31.12%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:600;">63.8</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="match">
+      <td class="td-name">Clean Max Enviro E...</td>
+      <td class="td-date">2026-03-02</td>
+      <td class="td-num">3,084</td>
+      <td class="td-num">₹1,053</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-9.57%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-11.18%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">1.6</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="match">
+      <td class="td-name">PNGS Reva Diamond ...</td>
+      <td class="td-date">2026-03-04</td>
+      <td class="td-num">380</td>
+      <td class="td-num">₹386</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-3.63%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-7.31%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">3.7</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="match">
+      <td class="td-name">Omnitech Engineeri...</td>
+      <td class="td-date">2026-03-05</td>
+      <td class="td-num">583</td>
+      <td class="td-num">₹227</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-9.69%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-8.01%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">1.7</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">Sedemac Mechatroni...</td>
+      <td class="td-date">2026-03-11</td>
+      <td class="td-num">1,087</td>
+      <td class="td-num">₹1,352</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+11.69%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-4.78%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">16.5</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="match">
+      <td class="td-name">Rajputana Stainles...</td>
+      <td class="td-date">2026-03-19</td>
+      <td class="td-num">255</td>
+      <td class="td-num">₹122</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+1.60%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-8.55%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">10.2</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">Innovision Ltd</td>
+      <td class="td-date">2026-03-23</td>
+      <td class="td-num">319</td>
+      <td class="td-num">₹519</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-10.21%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-6.06%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">4.2</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="match">
+      <td class="td-name">RaajMarg Infra Inv...</td>
+      <td class="td-date">2026-03-24</td>
+      <td class="td-num">6,000</td>
+      <td class="td-num">₹100</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+8.00%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+12.77%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">4.8</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="match">
+      <td class="td-name">GSP Crop Science L...</td>
+      <td class="td-date">2026-03-24</td>
+      <td class="td-num">400</td>
+      <td class="td-num">₹320</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+3.84%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-6.92%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">10.8</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="match">
+      <td class="td-name">Central Mine Plann...</td>
+      <td class="td-date">2026-03-30</td>
+      <td class="td-num">1,841</td>
+      <td class="td-num">₹172</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-5.35%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-7.75%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">2.4</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Amir Chand Jagdish...</td>
+      <td class="td-date">2026-04-02</td>
+      <td class="td-num">440</td>
+      <td class="td-num">₹212</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-8.02%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+1.34%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">9.4</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="match">
+      <td class="td-name">Powerica Ltd</td>
+      <td class="td-date">2026-04-02</td>
+      <td class="td-num">1,100</td>
+      <td class="td-num">₹395</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-5.06%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-7.17%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">2.1</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Low" data-match="match">
+      <td class="td-name">Sai Parenteral's L...</td>
+      <td class="td-date">2026-04-02</td>
+      <td class="td-num">409</td>
+      <td class="td-num">₹392</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+3.32%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-9.79%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">13.1</td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td class="td-center">✅</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Om Power Transmiss...</td>
+      <td class="td-date">2026-04-17</td>
+      <td class="td-num">150</td>
+      <td class="td-num">₹175</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+3.49%</td>
+      <td class="td-num" style="color:#ef4444;font-weight:700;">-0.32%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">3.8</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge high">High</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📉</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="miss">
+      <td class="td-name">Citius Transnet In...</td>
+      <td class="td-date">2026-04-29</td>
+      <td class="td-num">1,105</td>
+      <td class="td-num">₹100</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+4.50%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+14.89%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">10.4</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="Medium" data-match="miss">
+      <td class="td-name">Onemi Technology S...</td>
+      <td class="td-date">2026-05-08</td>
+      <td class="td-num">926</td>
+      <td class="td-num">₹171</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+11.70%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+9.56%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:600;">2.1</td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td><span class="tier-badge low">Low</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+    <tr class="ipo-row" data-tier="High" data-match="miss">
+      <td class="td-name">Bagmane Prime Offi...</td>
+      <td class="td-date">2026-05-14</td>
+      <td class="td-num">3,405</td>
+      <td class="td-num">₹100</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+3.40%</td>
+      <td class="td-num" style="color:#22c55e;font-weight:700;">+20.53%</td>
+      <td class="td-num" style="color:#eab308;font-weight:600;">17.1</td>
+      <td><span class="tier-badge high">High</span></td>
+      <td><span class="tier-badge medium">Medium</span></td>
+      <td class="td-center">❌</td>
+      <td class="td-center">📈</td>
+    </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <!-- INSIGHTS -->
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <div class="st"><div class="icon">💡</div> Key Insights & Analysis</div>
+
+  <div class="card">
+    <h4>🟢 What's Working Well</h4>
+    <p>
+      <span class="hl">Direction accuracy is 76.7%</span> — the model correctly predicts whether an IPO will list above or below its offer price about 3 out of 4 times. This is genuinely useful for screening IPOs before applying.
+      <br><br>
+      <span class="hl">High-tier detection is strong (86.2%)</span> — when the model says "this IPO will have high demand," it's right 86% of the time. This is the most reliable prediction and the most actionable for investors.
+      <br><br>
+      <span class="hl">75.7% of gain predictions fall within ±20pp</span> — while not precise enough for day trading, this gives investors a rough sense of whether an IPO will list with a gain or a loss.
+    </p>
+  </div>
+
+  <div class="card">
+    <h4>🔴 What Needs Improvement</h4>
+    <p>
+      <span class="hl">Low-tier detection is poor (31%)</span> — the model struggles to identify IPOs that will have very low subscription. It often misclassifies them as Medium. With only 29 Low-tier IPOs in the test set, the model doesn't have enough examples to learn this well.
+      <br><br>
+      <span class="hl">2026 direction accuracy dropped to 52%</span> — essentially a coin flip. The market conditions in 2026 may be fundamentally different from the training period (2010–2023), causing what data scientists call "model drift."
+      <br><br>
+      <span class="hl">Max error of 136.33pp</span> — extreme outliers where the model was very wrong. These are rare but costly. They happen when an IPO's subscription looks normal but something unusual causes a huge listing move.
+    </p>
+  </div>
+
+  <div class="card">
+    <h4>📐 Understanding the Two Models</h4>
+    <p>
+      Our system actually uses <strong>two separate models</strong>:
+      <br><br>
+      <strong>1. Tier Classifier (Logistic Regression)</strong> — Uses only <span class="hl">3 features</span>: issue size, offer price, and year. It predicts the subscription tier <em>before</em> bidding happens. Think of it as: "Based on the company's size and price, what tier is it likely to fall into?"
+      <br><br>
+      <strong>2. Gain Predictor (Huber Regression)</strong> — Uses <span class="hl">7 features</span> including the actual subscription numbers (QIB, HNI, RII, Total). It predicts the exact listing gain percentage. This one is more accurate because it has more information — but it only works <em>after</em> bidding closes and subscription data is available.
+      <br><br>
+      This two-model approach mirrors real life: before an IPO opens, you only know the issue size and price. After bidding closes, you also know the subscription ratios. The first model helps you decide whether to apply; the second helps you estimate how much you might gain.
+    </p>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <!-- FOOTER -->
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <div class="bottom-banner">
+    <p>Generated on August 20, 2026 · <strong>IPO Subscription & Listing Gain Prediction using Machine Learning</strong></p>
+    <p style="margin-top:4px;">Train: 438 IPOs (2010–2023) &nbsp;|&nbsp; Test: 210 IPOs (2024–2026) &nbsp;|&nbsp; Out-of-Time Split at Year 2023</p>
+  </div>
+
+</div>
+
+<script>
+function filterTable() {
+  var q = document.getElementById('searchBox').value.toLowerCase();
+  document.querySelectorAll('#ipoBody tr').forEach(function(r) {
+    r.style.display = r.cells[0].textContent.toLowerCase().indexOf(q) >= 0 ? '' : 'none';
+  });
+}
+function filterTier(tier, btn) {
+  document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.querySelectorAll('#ipoBody tr').forEach(function(r) {
+    var a = r.cells[7].textContent.trim();
+    var m = r.cells[9].textContent.trim();
+    var show = tier==='all' || (tier==='match' && m==='✅') || (tier==='miss' && m==='❌') || a===tier;
+    r.style.display = show ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

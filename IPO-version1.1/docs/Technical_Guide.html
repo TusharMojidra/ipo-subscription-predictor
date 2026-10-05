@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Technical Guide — IPO Subscription & Listing Gain Prediction</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F0F13; --panel: #1A1A22; --border: #2A2A35;
+    --text: #E4E4E7; --dim: #A1A1AA; --faint: #71717A;
+    --accent: #A855F7; --accent2: #EC4899; --lav: #C084FC;
+    --green: #22C55E; --red: #EF4444; --blue: #3B82F6;
+    --cyan: #06B6D4; --orange: #F97316;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 16px; line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ---- animated background ---- */
+  body::before {
+    content:''; position:fixed; inset:0; z-index:-1;
+    background:
+      radial-gradient(900px 500px at 80% -10%, rgba(168,85,247,0.08), transparent 60%),
+      radial-gradient(700px 400px at -10% 10%, rgba(236,72,153,0.06), transparent 55%);
+  }
+
+  /* ---- top bar ---- */
+  .topbar {
+    position:sticky; top:0; z-index:100;
+    display:flex; align-items:center; gap:14px;
+    background: rgba(15,15,19,0.85); backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--border);
+    padding:14px 40px;
+  }
+  .topbar .logo {
+    width:38px; height:38px; border-radius:10px;
+    background:linear-gradient(135deg, var(--accent), var(--accent2));
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-weight:700; font-family:'Space Grotesk',sans-serif; font-size:0.75rem;
+    box-shadow: 0 4px 12px rgba(168,85,247,0.4);
+  }
+  .topbar h1 { font-family:'Space Grotesk',sans-serif; font-size:1rem; font-weight:600; color:var(--text); }
+  .topbar .tag {
+    margin-left:auto; font-size:0.68rem; font-weight:600; letter-spacing:0.1em;
+    color:var(--lav); background:rgba(168,85,247,0.12);
+    border:1px solid rgba(168,85,247,0.3); border-radius:999px; padding:4px 14px;
+  }
+
+  /* ---- hero ---- */
+  .hero {
+    padding:60px 40px 40px; text-align:center;
+    background:
+      radial-gradient(700px 350px at 50% -20%, rgba(168,85,247,0.18), transparent 60%);
+  }
+  .hero h2 {
+    font-family:'Space Grotesk',sans-serif; font-size:2.8rem; font-weight:700;
+    line-height:1.15; margin-bottom:12px;
+  }
+  .hero h2 .grad {
+    background:linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero p { color:var(--dim); font-size:1.05rem; max-width:620px; margin:0 auto; }
+
+  /* ---- nav pills ---- */
+  .nav-pills {
+    display:flex; justify-content:center; gap:8px; flex-wrap:wrap;
+    padding:20px 40px 10px; position:sticky; top:66px; z-index:90;
+    background:rgba(15,15,19,0.92); backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-pills a {
+    text-decoration:none; font-size:0.8rem; font-weight:600; color:var(--dim);
+    padding:8px 20px; border-radius:999px; border:1px solid var(--border);
+    transition:all 0.2s;
+  }
+  .nav-pills a:hover { color:var(--text1); border-color:var(--accent); background:rgba(168,85,247,0.08); }
+  .nav-pills a.active {
+    color:#fff; border-color:transparent;
+    background:linear-gradient(135deg, var(--accent), var(--accent2));
+    box-shadow:0 4px 14px rgba(168,85,247,0.35);
+  }
+
+  /* ---- content ---- */
+  .container { max-width:960px; margin:0 auto; padding:30px 40px 80px; }
+
+  /* ---- section cards ---- */
+  .section {
+    background:var(--panel); border:1px solid var(--border); border-radius:18px;
+    padding:32px 36px; margin:28px 0; position:relative; overflow:hidden;
+    transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+  }
+  .section:hover {
+    transform:translateY(-3px); border-color:rgba(168,85,247,0.4);
+    box-shadow:0 18px 50px rgba(0,0,0,0.4);
+  }
+  .section::after {
+    content:''; position:absolute; inset:-1px; border-radius:19px;
+    border:1.5px dashed rgba(168,85,247,0); pointer-events:none;
+    transition: border-color 0.3s;
+  }
+  .section:hover::after { border-color:rgba(168,85,247,0.35); animation:spinDash 10s linear infinite; }
+  @keyframes spinDash { to { transform:rotate(360deg); } }
+
+  .section-num {
+    position:absolute; top:16px; right:20px;
+    font-family:'Space Grotesk',sans-serif; font-size:3rem; font-weight:700;
+    color:rgba(168,85,247,0.08); line-height:1;
+  }
+
+  .section h3 {
+    font-family:'Space Grotesk',sans-serif; font-size:1.35rem; font-weight:700;
+    color:var(--text); margin-bottom:14px; display:flex; align-items:center; gap:10px;
+  }
+  .section h3 .icon {
+    width:32px; height:32px; border-radius:8px; display:inline-flex;
+    align-items:center; justify-content:center; font-size:0.95rem; flex-shrink:0;
+  }
+  .icon-purple { background:rgba(168,85,247,0.15); color:var(--lav); }
+  .icon-green  { background:rgba(34,197,94,0.15);  color:var(--green); }
+  .icon-blue   { background:rgba(59,130,246,0.15);  color:var(--blue); }
+  .icon-pink   { background:rgba(236,72,153,0.15);  color:var(--accent2); }
+  .icon-orange { background:rgba(249,115,22,0.15);  color:var(--orange); }
+  .icon-cyan   { background:rgba(6,182,212,0.15);   color:var(--cyan); }
+
+  .section h4 {
+    font-family:'Space Grotesk',sans-serif; font-size:1rem; font-weight:600;
+    color:var(--lav); margin:18px 0 8px;
+  }
+
+  p { color:var(--text); margin-bottom:10px; }
+  p.dim { color:var(--dim); }
+  strong { color:#fff; font-weight:600; }
+  em { color:var(--lav); font-style:normal; font-weight:500; }
+
+  /* ---- code blocks ---- */
+  code {
+    font-family:'JetBrains Mono',monospace; font-size:0.82em;
+    background:rgba(168,85,247,0.1); color:var(--lav);
+    padding:2px 7px; border-radius:5px; border:1px solid rgba(168,85,247,0.15);
+  }
+  pre {
+    background:#111116; border:1px solid var(--border); border-radius:12px;
+    padding:18px 22px; margin:14px 0; overflow-x:auto;
+    font-family:'JetBrains Mono',monospace; font-size:0.82rem; line-height:1.65;
+    color:var(--dim);
+  }
+  pre .kw  { color:var(--accent); }
+  pre .fn  { color:var(--blue); }
+  pre .str { color:var(--green); }
+  pre .cmt { color:var(--faint); font-style:italic; }
+  pre .num { color:var(--orange); }
+
+  /* ---- flow diagram ---- */
+  .flow {
+    display:flex; flex-direction:column; gap:0; margin:16px 0;
+  }
+  .flow-step {
+    display:flex; align-items:flex-start; gap:16px;
+  }
+  .flow-dot {
+    width:40px; height:40px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk',sans-serif; font-size:0.82rem; font-weight:700; color:#fff;
+    position:relative; z-index:2;
+  }
+  .flow-line {
+    width:2px; background:linear-gradient(180deg, var(--accent), var(--accent2));
+    margin-left:19px; height:24px; flex-shrink:0;
+  }
+  .flow-body { padding-top:6px; }
+  .flow-body h5 { font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.95rem; color:var(--text); margin-bottom:4px; }
+  .flow-body p  { font-size:0.88rem; color:var(--dim); margin:0; }
+
+  /* ---- tables ---- */
+  table {
+    width:100%; border-collapse:collapse; margin:14px 0;
+    font-size:0.85rem;
+  }
+  th {
+    text-align:left; padding:10px 14px; font-weight:600; font-size:0.72rem;
+    letter-spacing:0.08em; text-transform:uppercase; color:var(--faint);
+    border-bottom:2px solid var(--border);
+  }
+  td {
+    padding:10px 14px; border-bottom:1px solid var(--border); color:var(--text);
+  }
+  tr:hover td { background:rgba(168,85,247,0.04); }
+
+  /* ---- badges ---- */
+  .badge {
+    display:inline-block; padding:3px 12px; border-radius:999px;
+    font-size:0.72rem; font-weight:600;
+  }
+  .badge-purple { background:rgba(168,85,247,0.15); color:var(--lav); }
+  .badge-green  { background:rgba(34,197,94,0.15);  color:var(--green); }
+  .badge-blue   { background:rgba(59,130,246,0.15);  color:var(--blue); }
+  .badge-pink   { background:rgba(236,72,153,0.15);  color:var(--accent2); }
+  .badge-orange { background:rgba(249,115,22,0.15);  color:var(--orange); }
+  .badge-cyan   { background:rgba(6,182,212,0.15);   color:var(--cyan); }
+
+  /* ---- insight boxes ---- */
+  .insight {
+    border-left:3px solid var(--accent); background:rgba(168,85,247,0.06);
+    padding:12px 18px; border-radius:0 10px 10px 0; margin:14px 0;
+    color:var(--dim); font-size:0.9rem;
+  }
+  .insight strong { color:var(--lav); }
+
+  /* ---- QA cards ---- */
+  .qa {
+    background:rgba(168,85,247,0.04); border:1px solid var(--border);
+    border-radius:14px; padding:20px 24px; margin:14px 0;
+    transition: border-color 0.2s;
+  }
+  .qa:hover { border-color:rgba(168,85,247,0.3); }
+  .qa .q {
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.95rem;
+    color:var(--accent2); margin-bottom:8px; display:flex; gap:8px; align-items:flex-start;
+  }
+  .qa .a { color:var(--dim); font-size:0.9rem; padding-left:24px; }
+  .qa .a strong { color:var(--text); }
+
+  /* ---- file cards ---- */
+  .file-card {
+    background:#111116; border:1px solid var(--border); border-radius:12px;
+    margin:14px 0; overflow:hidden; transition: border-color 0.2s;
+  }
+  .file-card:hover { border-color:rgba(168,85,247,0.3); }
+  .file-header {
+    display:flex; align-items:center; gap:10px; padding:12px 18px;
+    background:rgba(168,85,247,0.05); border-bottom:1px solid var(--border);
+    cursor:pointer;
+  }
+  .file-header .icon-sm {
+    width:24px; height:24px; border-radius:6px; display:flex;
+    align-items:center; justify-content:center; font-size:0.7rem; flex-shrink:0;
+  }
+  .file-header h5 { font-family:'JetBrains Mono',monospace; font-size:0.85rem; font-weight:500; color:var(--text); }
+  .file-header .path { margin-left:auto; font-size:0.7rem; color:var(--faint); font-family:'JetBrains Mono',monospace; }
+  .file-body { padding:16px 20px; }
+  .file-body p { font-size:0.88rem; }
+
+  /* ---- responsive ---- */
+  @media (max-width:700px) {
+    .hero h2 { font-size:1.8rem; }
+    .container { padding:20px 16px 60px; }
+    .section { padding:22px 20px; }
+    .topbar { padding:12px 16px; }
+    .nav-pills { padding:12px 16px 8px; }
+    pre { font-size:0.75rem; padding:14px; }
+    .section-num { font-size:2rem; }
+  }
+
+  /* ---- smooth scroll ---- */
+  html { scroll-behavior: smooth; }
+
+  /* ---- skeleton shimmer for preview ---- */
+  @keyframes fadeIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  .section { animation: fadeIn 0.5s ease both; }
+  .section:nth-child(2) { animation-delay:0.05s; }
+  .section:nth-child(3) { animation-delay:0.1s; }
+  .section:nth-child(4) { animation-delay:0.15s; }
+  .section:nth-child(5) { animation-delay:0.2s; }
+
+  ul { margin:8px 0 12px 20px; }
+  li { margin-bottom:6px; color:var(--dim); font-size:0.9rem; }
+  li strong { color:var(--text); }
+</style>
+</head>
+<body>
+
+<!-- ===== TOP BAR ===== -->
+<div class="topbar">
+  <div class="logo">IP</div>
+  <h1>IPO Prediction Project — Technical Guide</h1>
+  <span class="tag">PDS COURSE</span>
+</div>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <h2>🚀 IPO Subscription &<br><span class="grad">Listing Gain Prediction</span><br>Using Machine Learning</h2>
+  <p>A beginner-friendly walkthrough of every file, every function, and every design decision in our project — so you can explain it to anyone.</p>
+</div>
+
+<!-- ===== NAV PILLS ===== -->
+<div class="nav-pills">
+  <a href="#overview" class="active">Overview</a>
+  <a href="#ipo-model">IPO Model</a>
+  <a href="#pipeline">Pipeline</a>
+  <a href="#files">File Breakdown</a>
+  <a href="#tech-stack">Tech Stack</a>
+  <a href="#qa">Q&A Prep</a>
+</div>
+
+<div class="container">
+
+<!-- ============================================================ -->
+<!-- SECTION 1 — HIGH-LEVEL OVERVIEW                              -->
+<!-- ============================================================ -->
+<div class="section" id="overview">
+  <span class="section-num">01</span>
+  <h3><span class="icon icon-purple">🎯</span> High-Level Overview</h3>
+
+  <p><strong>What does this project do?</strong></p>
+  <p>We built a <em>machine learning system</em> that predicts two things about upcoming Indian IPOs:</p>
+
+  <table>
+    <tr><th>Prediction</th><th>What it answers</th><th>How</th></tr>
+    <tr>
+      <td><strong>Subscription Tier</strong></td>
+      <td>"Will this IPO be oversubscribed (hot) or undersubscribed (cold)?"</td>
+      <td><span class="badge badge-purple">Classification</span> — Low / Medium / High</td>
+    </tr>
+    <tr>
+      <td><strong>Listing Gain</strong></td>
+      <td>"How much will the stock price rise (or fall) on listing day?"</td>
+      <td><span class="badge badge-green">Regression</span> — predicts a percentage</td>
+    </tr>
+  </table>
+
+  <div class="insight">
+    <strong>In 2 sentences:</strong> Our system learns from 648 historical IPOs (2010–2026) how issue size, offer price, and subscription data relate to listing performance. It then uses that pattern to predict the outcome for a brand-new IPO.
+  </div>
+
+  <h4>Why is this useful?</h4>
+  <p>When a new IPO launches, investors want to know: <em>"Should I apply for this?"</em> Our tool gives them a data-driven estimate <strong>before the stock lists</strong>, based on patterns from hundreds of past IPOs.</p>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 2 — THE IPO MODEL                                    -->
+<!-- ============================================================ -->
+<div class="section" id="ipo-model">
+  <span class="section-num">02</span>
+  <h3><span class="icon icon-green">📥</span> The IPO (Input → Process → Output) Model</h3>
+
+  <h4>📥 Input — What data enters the system?</h4>
+  <p>We start with a CSV file containing <strong>648 IPO records</strong> scraped from the Indian primary market. Each row represents one IPO and has these columns:</p>
+
+  <table>
+    <tr><th>Column</th><th>Example</th><th>What it means</th></tr>
+    <tr><td><code>IPO_Name</code></td><td>NMDC Limited</td><td>Company name</td></tr>
+    <tr><td><code>Date</code></td><td>2023-11-28</td><td>Listing date</td></tr>
+    <tr><td><code>Issue_Size(crores)</code></td><td>4500</td><td>Total ₹ being raised</td></tr>
+    <tr><td><code>Offer_Price</code></td><td>₹183</td><td>Price per share in the IPO</td></tr>
+    <tr><td><code>QIB</code></td><td>32.5×</td><td>Institutional investor oversubscription</td></tr>
+    <tr><td><code>HNI</code></td><td>18.7×</td><td>High-net-worth individual oversubscription</td></tr>
+    <tr><td><code>RII</code></td><td>8.2×</td><td>Regular retail investor oversubscription</td></tr>
+    <tr><td><code>Total</code></td><td>21.4×</td><td>Total oversubscription (times)</td></tr>
+    <tr><td><code>List Price</code></td><td>₹206</td><td>Price on the first trading day</td></tr>
+    <tr><td><code>Listing Gain</code></td><td>+12.6%</td><td><em>This is our target — what we predict</em></td></tr>
+  </table>
+
+  <h4>⚙️ Process — What happens to the data?</h4>
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-dot" style="background:var(--accent);">1</div>
+      <div class="flow-body">
+        <h5>Clean the data</h5>
+        <p>Remove duplicates, fix bad dates, fill missing values with medians, cap extreme outliers.</p>
+      </div>
+    </div>
+    <div class="flow-line"></div>
+    <div class="flow-step">
+      <div class="flow-dot" style="background:var(--blue);">2</div>
+      <div class="flow-body">
+        <h5>Engineer features</h5>
+        <p>Create log-transformed columns (because subscription data is heavily skewed) and demand-ratio features (QIB share, HNI-to-QIB ratio, etc.).</p>
+      </div>
+    </div>
+    <div class="flow-line"></div>
+    <div class="flow-step">
+      <div class="flow-dot" style="background:var(--green);">3</div>
+      <div class="flow-body">
+        <h5>Split data (out-of-time)</h5>
+        <p>Train on IPOs from 2010–2023, test on 2024–2026. This simulates real prediction: we never peek at the future.</p>
+      </div>
+    </div>
+    <div class="flow-line"></div>
+    <div class="flow-step">
+      <div class="flow-dot" style="background:var(--accent2);">4</div>
+      <div class="flow-body">
+        <h5>Train models</h5>
+        <p>Classification (Random Forest, Logistic Regression, SVM) + Regression (Huber, Gradient Boosting, Random Forest). GridSearchCV finds the best parameters.</p>
+      </div>
+    </div>
+  </div>
+
+  <h4>📤 Output — What do we deliver?</h4>
+  <ul>
+    <li><strong>Interactive web dashboard</strong> (Streamlit) where users enter IPO details and get instant predictions</li>
+    <li><strong>Subscription tier</strong> — Low / Medium / High with confidence percentages</li>
+    <li><strong>Listing gain estimate</strong> — e.g., "+12.6% (typical error ±18 points)"</li>
+    <li><strong>SHAP explainability</strong> — shows which feature pushed the prediction up or down</li>
+    <li><strong>3D visualizations</strong> — interactive scatter plots of the IPO dataset</li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 3 — PIPELINE & ARCHITECTURE                          -->
+<!-- ============================================================ -->
+<div class="section" id="pipeline">
+  <span class="section-num">03</span>
+  <h3><span class="icon icon-blue">🏗️</span> Pipeline & Architecture</h3>
+
+  <p>Here's how data flows through the entire system, from raw CSV to live prediction:</p>
+
+  <pre><span class="cmt">┌─────────────────────────────────────────────────────────────────┐</span>
+<span class="cmt">│</span>                     <span class="kw">DATA FLOW ARCHITECTURE</span>                      <span class="cmt">│</span>
+<span class="cmt">└─────────────────────────────────────────────────────────────────┘</span>
+
+  <span class="str">data/raw/ipo_data.csv</span>
+         │
+         ▼
+  ┌──────────────────┐
+  │  data_loader.py  │  <span class="cmt">← reads CSV with pandas</span>
+  └────────┬─────────┘
+           ▼
+  ┌──────────────────┐
+  │ preprocessing.py │  <span class="cmt">← clean, dedupe, impute, winsorize</span>
+  └────────┬─────────┘
+           ▼
+  ┌────────────────────────┐
+  │ feature_engineering.py │  <span class="cmt">← log transforms, demand ratios, tier labels</span>
+  └────────┬───────────────┘
+           ▼
+  ┌────────────────────────────┐
+  │ data/processed/            │
+  │ cleaned_ipo_data.csv       │  <span class="cmt">← saved here for all downstream use</span>
+  └────┬───────────┬───────────┘
+       │           │
+       ▼           ▼
+  ┌────────────┐  ┌──────────────────┐  ┌──────────────────┐
+  │  eda.py    │  │ classification.py│  │ regression.py    │
+  │  heatmaps  │  │ RF, LR, SVM      │  │ Huber, GBM, RF   │
+  │  histograms│  │ tier prediction  │  │ gain prediction  │
+  └────────────┘  └──────────────────┘  └──────────────────┘
+       │                   │                     │
+       ▼                   ▼                     ▼
+  ┌──────────────────────────────────────────────────────────┐
+  │                    app.py  (Streamlit)                   │
+  │  ┌──────────┐  ┌──────────┐  ┌────────┐  ┌──────────┐  │
+  │  │ Predictor │  │ Data&EDA │  │ Model  │  │  About   │  │
+  │  │  tab      │  │  tab     │  │  tab   │  │  tab     │  │
+  │  └──────────┘  └──────────┘  └────────┘  └──────────┘  │
+  │  uses predict_ipo.py to load cached models & predict     │
+  └──────────────────────────────────────────────────────────┘</pre>
+
+  <div class="insight">
+    <strong>Key design choice:</strong> We use an <em>out-of-time split</em> (train before 2023, test after 2023) instead of random splitting. This simulates real-world prediction — the model never sees future IPOs during training.
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 4 — FILE-BY-FILE BREAKDOWN                           -->
+<!-- ============================================================ -->
+<div class="section" id="files">
+  <span class="section-num">04</span>
+  <h3><span class="icon icon-pink">📂</span> File-by-File Breakdown</h3>
+
+  <!-- ---- main.py ---- -->
+  <div class="file-card">
+    <div class="file-header">
+      <div class="icon-sm icon-purple">🐍</div>
+      <h5>main.py</h5>
+      <span class="path">root/</span>
+    </div>
+    <div class="file-body">
+      <p><strong>Purpose:</strong> The master orchestrator. Runs the entire offline pipeline from one command: <code>python main.py</code></p>
+      <p><strong>What it does (step by step):</strong></p>
+      <ol style="margin:8px 0 8px 20px; color:var(--dim); font-size:0.88rem;">
+        <li>Calls <code>load_data()</code> from <code>data_loader.py</code> to read the raw CSV</li>
+        <li>Calls <code>clean_data()</code> → <code>drop_unusable_rows()</code> → <code>fill_missing_values()</code> → <code>winsorize_outliers()</code> from <code>preprocessing.py</code></li>
+        <li>Calls <code>add_subscription_class()</code> from <code>feature_engineering.py</code> to create the Low/Medium/High target</li>
+        <li>Saves cleaned data to <code>data/processed/cleaned_ipo_data.csv</code></li>
+        <li>Calls <code>run_eda()</code> to generate charts</li>
+        <li>Calls <code>run_classification()</code> and <code>run_regression()</code> to train models</li>
+      </ol>
+      <p><strong>Imports:</strong> Everything from <code>src/</code> — <code>data_loader</code>, <code>preprocessing</code>, <code>feature_engineering</code>, <code>eda</code>, <code>models_classification</code>, <code>models_regression</code></p>
+    </div>
+  </div>
+
+  <!-- ---- data_loader.py ---- -->
+  <div class="file-card">
+    <div class="file-header">
+      <div class="icon-sm icon-green">🐍</div>
+      <h5>src/data_loader.py</h5>
+      <span class="path">src/</span>
+    </div>
+    <div class="file-body">
+      <p><strong>Purpose:</strong> One-liner — reads the raw CSV into a pandas DataFrame.</p>
+      <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="kw">def</span> <span class="fn">load_data</span>(path):
+    <span class="kw">return</span> pd.<span class="fn">read_csv</span>(path)</pre>
+      <p><strong>Why a separate file?</strong> Keeps the I/O separate from logic. If we later switch to a database or API, we only change this one function.</p>
+      <p><strong>Passes data to:</strong> <code>main.py</code> → then to <code>preprocessing.py</code></p>
+    </div>
+  </div>
+
+  <!-- ---- preprocessing.py ---- -->
+  <div class="file-card">
+    <div class="file-header">
+      <div class="icon-sm icon-blue">🐍</div>
+      <h5>src/preprocessing.py</h5>
+      <span class="path">src/</span>
+    </div>
+    <div class="file-body">
+      <p><strong>Purpose:</strong> Clean the raw data. This is where we turn messy, real-world data into something models can learn from.</p>
+      <p><strong>4 functions, each doing one job:</strong></p>
+      <table>
+        <tr><th>Function</th><th>What it does (in plain English)</th></tr>
+        <tr>
+          <td><code>clean_data(df)</code></td>
+          <td>Strips whitespace from column names, converts <code>Date</code> to datetime format, converts numeric columns from text to numbers, drops rows with unparseable dates. Also extracts <code>Year</code> from the date.</td>
+        </tr>
+        <tr>
+          <td><code>drop_unusable_rows(df)</code></td>
+          <td>Removes rows that are missing the target (<code>Listing Gain</code>) or missing ALL subscription data. Also fixes a data error where <code>List Price == 0</code> (treats it as missing).</td>
+        </tr>
+        <tr>
+          <td><code>fill_missing_values(df)</code></td>
+          <td>Fills any remaining <code>NaN</code> values with the column median. We use median instead of 0 because zero would corrupt price columns.</td>
+        </tr>
+        <tr>
+          <td><code>winsorize_outliers(df)</code></td>
+          <td>Caps extreme values at the 1st and 99th percentile. This prevents one mega-IPO from dominating the model's learning.</td>
+        </tr>
+      </table>
+      <p><strong>Imports:</strong> <code>pandas</code>, <code>numpy</code></p>
+      <p><strong>Passes data to:</strong> Back to <code>main.py</code> → then to <code>feature_engineering.py</code></p>
+    </div>
+  </div>
+
+  <!-- ---- feature_engineering.py ---- -->
+  <div class="file-card">
+    <div class="file-header">
+      <div class="icon-sm icon-pink">🐍</div>
+      <h5>src/feature_engineering.py</h5>
+      <span class="path">src/</span>
+    </div>
+    <div class="file-body">
+      <p><strong>Purpose:</strong> Create new, more useful columns from the existing data. This is often the most important step — better features = better predictions.</p>
+      <p><strong>Key functions:</strong></p>
+      <table>
+        <tr><th>Function</th><th>What it does</th></tr>
+        <tr>
+          <td><code>add_log_features(df)</code></td>
+          <td>Applies <code>log1p</code> transformation to subscription columns (QIB, HNI, RII, Total) and price columns. Why? Because subscription data is <em>heavily right-skewed</em> — a few IPOs have 100× oversubscription while most have 5×. Log compresses this so the model treats all IPOs fairly.</td>
+        </tr>
+        <tr>
+          <td><code>add_demand_ratios(df)</code></td>
+          <td>Creates share-of-demand features: <code>QIB_share</code> (what % of demand is institutional), <code>RII_share</code> (retail %), <code>HNI_to_QIB</code> ratio. These are the top predictors in similar published projects.</td>
+        </tr>
+        <tr>
+          <td><code>add_subscription_class(df)</code></td>
+          <td>Categorizes Total subscription into 3 tiers: <em>Low</em> (&lt;2×), <em>Medium</em> (2×–10×), <em>High</em> (≥10×). This creates the classification target variable.</td>
+        </tr>
+      </table>
+      <p><strong>Imports:</strong> <code>numpy</code>, <code>pandas</code></p>
+      <p><strong>Passes data to:</strong> Saved to <code>data/processed/cleaned_ipo_data.csv</code></p>
+    </div>
+  </div>
+
+  <!-- ---- eda.py ---- -->
+  <div class="file-card">
+    <div class="file-header">
+      <div class="icon-sm icon-orange">🐍</div>
+      <h5>src/eda.py</h5>
+      <span class="path">src/</span>
+    </div>
+    <div class="file-body">
+      <p><strong>Purpose:</strong> Exploratory Data Analysis — generates charts that help us understand the data before modeling.</p>
+      <p><strong>Creates 3 charts:</strong></p>
+      <ul>
+        <li><strong>Correlation heatmap</strong> — shows which features relate to each other and to listing gain. (We found Total subscription has the strongest correlation with listing gain.)</li>
+        <li><strong>Distribution histograms</strong> — reveals that subscription data is heavily skewed right (most IPOs have low subscription, a few have extreme oversubscription).</li>
+        <li><strong>Class balance chart</strong> — shows the Low/Medium/High split. Medium is the majority class, which is why balanced accuracy matters more than raw accuracy.</li>
+      </ul>
+      <p><strong>Imports:</strong> <code>matplotlib</code>, <code>seaborn</code></p>
+      <p><strong>Saves to:</strong> <code>reports/figures/</code></p>
+    </div>
+  </div>
+
+  <!-- ---- models_classification.py ---- -->
+  <div class="file-card">
+    <div class="file-header">
+      <div class="icon-sm icon-cyan">🐍</div>
+      <h5>src/models_classification.py</h5>
+      <span class="path">src/</span>
+    </div>
+    <div class="file-body">
+      <p><strong>Purpose:</strong> Predicts the subscription tier (Low / Medium / High) using 3 pre-IPO features: <code>Issue_Size</code>, <code>Offer_Price</code>, <code>Year</code>.</p>
+      <p><strong>Why these 3 features only?</strong> This is a <em>pre-IPO prediction</em> — we simulate what an investor knows BEFORE the IPO opens. No subscription data is available yet.</p>
+      <p><strong>Models tested:</strong></p>
+      <table>
+        <tr><th>Model</th><th>Best Accuracy</th><th>Notes</th></tr>
+        <tr><td>Logistic Regression</td><td>~62%</td><td>Best performer — simple but effective</td></tr>
+        <tr><td>Random Forest</td><td>~54%</td><td>Overfits on small dataset</td></tr>
+        <tr><td>SVM</td><td>~59%</td><td>Decent but slower to train</td></tr>
+      </table>
+      <p><strong>Key technique:</strong> <code>class_weight='balanced'</code> — tells the model to pay more attention to the rare classes (Low and High) so it doesn't just predict Medium for everything.</p>
+      <p><strong>Out-of-time split:</strong> Train on year ≤ 2023, test on year &gt; 2023.</p>
+    </div>
+  </div>
+
+  <!-- ---- models_regression.py ---- -->
+  <div class="file-card">
+    <div class="file-header">
+      <div class="icon-sm icon-green">🐍</div>
+      <h5>src/models_regression.py</h5>
+      <span class="path">src/</span>
+    </div>
+    <div class="file-body">
+      <p><strong>Purpose:</strong> Predicts the listing gain percentage using 6 log-transformed features: <code>log_QIB</code>, <code>log_HNI</code>, <code>log_RII</code>, <code>log_Total</code>, <code>log_Issue_Size</code>, <code>log_Offer_Price</code>.</p>
+      <p><strong>Why log-transformed?</strong> Raw subscription data ranges from 0.5× to 200×. Log1p compresses this to a range the model can handle linearly.</p>
+      <p><strong>Models tested:</strong></p>
+      <table>
+        <tr><th>Model</th><th>Best R²</th><th>Notes</th></tr>
+        <tr><td>Huber Regression</td><td>~0.30</td><td><strong>Winner</strong> — robust to outliers in the target</td></tr>
+        <tr><td>Linear Regression</td><td>~0.25</td><td>Baseline — assumes linear relationship</td></tr>
+        <tr><td>Gradient Boosting</td><td>~0.22</td><td>Tends to overfit on small data</td></tr>
+        <tr><td>Random Forest</td><td>~0.18</td><td>Overfits — not enough training data</td></tr>
+      </table>
+      <p><strong>Why Huber wins:</strong> Listing gains have extreme outliers (some IPOs gain +300%, others lose -40%). Huber regression ignores these extremes during training, while other models chase them.</p>
+    </div>
+  </div>
+
+  <!-- ---- predict_ipo.py ---- -->
+  <div class="file-card">
+    <div class="file-header">
+      <div class="icon-sm icon-purple">🐍</div>
+      <h5>predict_ipo.py</h5>
+      <span class="path">root/</span>
+    </div>
+    <div class="file-body">
+      <p><strong>Purpose:</strong> The prediction engine. Used by both the Streamlit dashboard (<code>app.py</code>) and the CLI demo. Trains models on the full dataset and caches them to disk.</p>
+      <p><strong>Key functions:</strong></p>
+      <table>
+        <tr><th>Function</th><th>What it does</th></tr>
+        <tr>
+          <td><code>load_training_data()</code></td>
+          <td>Loads <code>cleaned_ipo_data.csv</code>. If missing, rebuilds it from raw data (safety net).</td>
+        </tr>
+        <tr>
+          <td><code>train_models(df)</code></td>
+          <td>Trains the Random Forest classifier + Huber regressor. Caches to <code>models/ipo_models.joblib</code> so the next start is instant. Only retrains when the data changes (uses a file hash).</td>
+        </tr>
+        <tr>
+          <td><code>engineer_input(...)</code></td>
+          <td>Converts raw user input (issue size, price, etc.) into the same log-transformed features the models were trained on.</td>
+        </tr>
+      </table>
+      <p><strong>Caching strategy:</strong> <code>joblib.dump()</code> saves the trained models + scaler to disk. On next run, <code>joblib.load()</code> loads them instantly. A hash of the cleaned CSV invalidates the cache when data changes.</p>
+    </div>
+  </div>
+
+  <!-- ---- app.py ---- -->
+  <div class="file-card">
+    <div class="file-header">
+      <div class="icon-sm icon-pink">🌐</div>
+      <h5>app.py</h5>
+      <span class="path">root/</span>
+    </div>
+    <div class="file-body">
+      <p><strong>Purpose:</strong> The Streamlit web dashboard — the entire user-facing application. This is a big file (~1800 lines) that combines UI, CSS, JavaScript, and ML inference.</p>
+      <p><strong>Architecture breakdown:</strong></p>
+      <table>
+        <tr><th>Section</th><th>Lines (approx)</th><th>What it contains</th></tr>
+        <tr><td>Theme & Font config</td><td>50–130</td><td>3 color themes (Charcoal, Midnight, Emerald) + 4 font presets. Applied via CSS variables.</td></tr>
+        <tr><td>Navbar JavaScript</td><td>105–165</td><td>Custom sticky navbar that clicks the matching native Streamlit tab. Handles crossfade animations.</td></tr>
+        <tr><td>Custom CSS</td><td>170–620</td><td>Premium dark fintech theme — glassmorphism, 3D hover tilt, responsive breakpoints, widget styling.</td></tr>
+        <tr><td>3D Widget (Predictor)</td><td>742–840</td><td>Pure CSS 3D spinning bar chart inside an iframe. Works in all browsers, no WebGL needed.</td></tr>
+        <tr><td>Data Loading</td><td>870–910</td><td><code>@st.cache_resource</code> loads data + trains models once, then serves from memory.</td></tr>
+        <tr><td>Predictor Tab</td><td>1230–1400</td><td>Input forms (Issue Size, Offer Price, QIB, HNI, RII, Total), prediction display, SHAP waterfall chart.</td></tr>
+        <tr><td>Data & EDA Tab</td><td>1430–1600</td><td>Altair donut chart, recent IPOs table, interactive 3D scatter plot (year-by-year animation), correlation heatmap, histograms.</td></tr>
+        <tr><td>Model Tab</td><td>1600–1650</td><td>Confusion matrices, accuracy metrics, regression R², feature importance.</td></tr>
+        <tr><td>About Tab</td><td>1650–1700</td><td>Project description, team info, methodology summary.</td></tr>
+      </table>
+      <p><strong>Imports:</strong> <code>streamlit</code>, <code>altair</code>, <code>plotly</code>, <code>shap</code> (lazy), <code>predict_ipo.py</code>, <code>feature_engineering.py</code></p>
+    </div>
+  </div>
+
+  <!-- ---- requirements.txt ---- -->
+  <div class="file-card">
+    <div class="file-header">
+      <div class="icon-sm icon-blue">📄</div>
+      <h5>requirements.txt</h5>
+      <span class="path">root/</span>
+    </div>
+    <div class="file-body">
+      <p><strong>Purpose:</strong> Lists all Python packages needed to run the project. Install with: <code>pip install -r requirements.txt</code></p>
+      <table>
+        <tr><th>Package</th><th>What it's used for</th></tr>
+        <tr><td><code>pandas</code></td><td>Data manipulation — reading CSVs, cleaning, filtering</td></tr>
+        <tr><td><code>numpy</code></td><td>Math operations — log transforms, numerical computation</td></tr>
+        <tr><td><code>scikit-learn</code></td><td>Machine learning — all our models, scalers, metrics, grid search</td></tr>
+        <tr><td><code>matplotlib</code></td><td>Static charts — confusion matrices, feature importance plots</td></tr>
+        <tr><td><code>seaborn</code></td><td>Pretty statistical plots — heatmaps, histograms</td></tr>
+        <tr><td><code>streamlit</code></td><td>Web dashboard — the entire UI</td></tr>
+        <tr><td><code>plotly</code></td><td>Interactive 3D charts — the year-by-year scatter plot</td></tr>
+        <tr><td><code>altair</code></td><td>Declarative charts — the donut chart, bar charts</td></tr>
+        <tr><td><code>shap</code></td><td>Model explainability — explains why a prediction was made</td></tr>
+        <tr><td><code>joblib</code></td><td>Model caching — saves/loads trained models to disk</td></tr>
+        <tr><td><code>xgboost</code></td><td>Alternative gradient boosting model (tested but not final pick)</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 5 — TECH STACK VISUAL                                -->
+<!-- ============================================================ -->
+<div class="section" id="tech-stack">
+  <span class="section-num">05</span>
+  <h3><span class="icon icon-orange">⚙️</span> Tech Stack at a Glance</h3>
+
+  <table>
+    <tr><th>Layer</th><th>Technology</th><th>Why we chose it</th></tr>
+    <tr><td><strong>Language</strong></td><td>Python 3.13</td><td>Best ecosystem for data science and ML</td></tr>
+    <tr><td><strong>Data Processing</strong></td><td>Pandas + NumPy</td><td>Industry standard for tabular data</td></tr>
+    <tr><td><strong>Machine Learning</strong></td><td>Scikit-learn</td><td>Covers all our needs: RF, LR, SVM, Huber, GBM, GridSearchCV</td></tr>
+    <tr><td><strong>Explainability</strong></td><td>SHAP</td><td>Shows exactly which feature pushed the prediction — builds trust</td></tr>
+    <tr><td><strong>Dashboard</strong></td><td>Streamlit</td><td>Turns Python scripts into web apps in minutes — no HTML/CSS knowledge needed</td></tr>
+    <tr><td><strong>Visualization</strong></td><td>Plotly + Altair + Matplotlib</td><td>Plotly for 3D interactive charts, Altair for clean 2D charts, Matplotlib for static reports</td></tr>
+    <tr><td><strong>Model Persistence</strong></td><td>Joblib</td><td>Fast serialization of scikit-learn models to disk</td></tr>
+  </table>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 6 — ANTICIPATED Q&A                                  -->
+<!-- ============================================================ -->
+<div class="section" id="qa">
+  <span class="section-num">06</span>
+  <h3><span class="icon icon-cyan">🎙️</span> Anticipated Coordinator Questions</h3>
+  <p class="dim">Here are 6 tough questions your coordinator might ask, with simple confident answers:</p>
+
+  <div class="qa">
+    <div class="q">❓ Q1: "Why is the classification accuracy only 62%? That seems low."</div>
+    <div class="a">
+      <strong>A:</strong> It's important to clarify that 62% is the <strong>out-of-time accuracy</strong> — we test on IPOs from 2024–2026 that the model has never seen. Random guessing on 3 classes would give 33%, so 62% is nearly double that. The task is inherently hard because IPO demand depends on market sentiment, which changes over time. Comparable published projects report 60–69% on similar tasks. Also, <strong>balanced accuracy is low because the classes are imbalanced</strong> — Medium is the majority class. We use <code>class_weight='balanced'</code> to mitigate this.
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">❓ Q2: "Why did you choose an out-of-time split instead of random train-test split?"</div>
+    <div class="a">
+      <strong>A:</strong> A random split would let the model "peek into the future" — it might train on a 2025 IPO and test on a 2024 IPO, which inflates accuracy. In the real world, we're predicting <em>future</em> IPOs we haven't seen yet. The out-of-time split (train on 2010–2023, test on 2024–2026) simulates this reality and gives us a more honest estimate of real-world performance.
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">❓ Q3: "Why use log transforms? What happens if you don't?"</div>
+    <div class="a">
+      <strong>A:</strong> Subscription data is heavily right-skewed. Most IPOs get 5–20× oversubscription, but a few get 100–200×. Without log transforms, the model would treat the 200× IPO as an extreme outlier and distort its learning. <code>log1p</code> compresses the range: log(5) ≈ 1.6, log(200) ≈ 5.3. This makes the distribution more normal and helps linear models converge. In our experiments, log features improved R² by ~0.3 points compared to raw features.
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">❓ Q4: "Why Huber regression over Random Forest for listing gain?"</div>
+    <div class="a">
+      <strong>A:</strong> Listing gains have extreme outliers — some IPOs gain +300%, others lose -40%. Random Forest tends to overfit to these extremes on a small dataset (648 rows). Huber regression uses a loss function that's <strong>quadratic for small errors but linear for large errors</strong>, meaning it essentially ignores the extreme outliers during training. This makes it more robust. Our R² improved from 0.18 (RF) to 0.30 (Huber) with the same features.
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">❓ Q5: "How does the model caching work? Won't it serve stale predictions?"</div>
+    <div class="a">
+      <strong>A:</strong> We use <code>joblib.dump()</code> to save trained models to disk. On the next app start, we compute an MD5 hash of the cleaned CSV. If the hash matches the cached one, we load from disk (instant). If the data changes (new IPOs added), the hash won't match and the models retrain automatically. In the Streamlit app, we also use <code>@st.cache_resource</code> which keeps models in memory across reruns. So no — stale predictions are impossible as long as the data file is updated.
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">❓ Q6: "What would you improve if you had more time?"</div>
+    <div class="a">
+      <strong>A:</strong> Three things:
+      <strong>(1) More features</strong> — sector/industry encoding, grey market premium (GMP), company fundamentals (revenue, profit). These are available from IPO review sites.
+      <strong>(2) Larger dataset</strong> — 648 IPOs is small for ML. We could augment with NSE/BSE historical data going back to 2000.
+      <strong>(3) Time-series modeling</strong> — market sentiment shifts over time. An LSTM or transformer model could capture temporal patterns that a static model misses.
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== FOOTER ===== -->
+<div style="text-align:center; padding:30px 0 50px; color:var(--faint); font-size:0.78rem;">
+  <p>IPO Subscription & Listing Gain Prediction — PDS Course Project</p>
+  <p style="margin-top:4px;">Built with 💜 using Python, Scikit-learn & Streamlit</p>
+</div>
+
+</div><!-- /container -->
+</body>
+</html>
